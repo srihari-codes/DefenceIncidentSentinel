@@ -1,9 +1,10 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../../../.env') });
 
 module.exports = {
   // Server
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT, 10) || 3000,
+  port: parseInt(process.env.PORT_REGISTRATION || process.env.PORT, 10) || 3000,
   
   // MongoDB
   mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/defence_sentinel',
