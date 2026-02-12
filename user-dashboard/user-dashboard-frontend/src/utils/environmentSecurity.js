@@ -100,6 +100,8 @@ export const enableStrictCSP = () => {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     connectSources.add('http://localhost:3000');
     connectSources.add('http://127.0.0.1:3000');
+    connectSources.add('http://localhost:4000'); // Auth service backend
+    connectSources.add('http://localhost:4001'); // Dashboard backend
   }
 
   // Note: frame-ancestors can only be set via HTTP headers, not meta tags

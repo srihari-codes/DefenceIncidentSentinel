@@ -26,7 +26,7 @@ export default function Callback() {
         description: 'No authorization code provided',
         variant: 'destructive',
       });
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login'), 20000);
       return;
     }
 
@@ -37,19 +37,19 @@ export default function Callback() {
 
         if (result.success && result.data) {
           console.log('[Callback] Code exchange successful, storing tokens and redirecting');
-          
+
           // Store tokens in localStorage (cross-domain - tokens in response body)
           localStorage.setItem('access_token', result.data.access_token);
           localStorage.setItem('refresh_token', result.data.refresh_token);
           localStorage.setItem('user', JSON.stringify(result.data.user));
-          
+
           const role = result.data.user.role as RoleKey;
 
           // Redirect based on role (use same logic as forms)
           let redirectPath = '/dashboard';
-          
+
           const target = ROLE_REDIRECTS[role] || ROLE_REDIRECTS.default;
-          
+
           if (target.startsWith('http')) {
             window.location.href = target;
           } else {
@@ -63,26 +63,26 @@ export default function Callback() {
           const errorMsg = result.error?.message || 'Invalid or expired authorization code';
           setError(errorMsg);
           console.error('[Callback] Code exchange failed:', errorMsg);
-          
+
           toast({
             title: 'Authentication Failed',
             description: errorMsg,
             variant: 'destructive',
           });
-          
+
           setTimeout(() => navigate('/login', { replace: true }), 2000);
         }
       } catch (error) {
         const errorMsg = 'Failed to complete authentication';
         setError(errorMsg);
         console.error('[Callback] Code exchange error:', error);
-        
+
         toast({
           title: 'Error',
           description: errorMsg,
           variant: 'destructive',
         });
-        
+
         setTimeout(() => navigate('/login', { replace: true }), 2000);
       } finally {
         setIsExchanging(false);

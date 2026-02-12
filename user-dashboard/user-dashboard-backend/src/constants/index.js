@@ -3,6 +3,7 @@
 // ──────────────────────────────────────────────
 
 const COMPLAINT_CATEGORIES = [
+  'unknown',
   'phishing',
   'malware',
   'honeytrap',

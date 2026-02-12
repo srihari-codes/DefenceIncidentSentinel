@@ -44,11 +44,11 @@ export function AuthCallback() {
       } catch (err) {
         console.error('Auth callback error:', err);
         setError('Authentication failed. Please try again.');
-        
+
         // Redirect back to auth service login after 3 seconds
         setTimeout(() => {
           window.location.href = `${API_CONFIG.AUTH_FRONTEND_URL}/login`;
-        }, 3000);
+        }, 30000);
       }
     };
 
