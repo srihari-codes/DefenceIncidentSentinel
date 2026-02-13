@@ -5,6 +5,7 @@ import QuickActionButton from "../components/QuickActionButton";
 import MessageInput from "../components/MessageInput";
 import { submitComplaint, trackComplaintStatus } from "../api/complaint";
 import { sendChatMessage } from "../api/chatbot";
+import { useSidebar } from '../contexts/SidebarContext';
 
 /**
  * FINAL MERGED App.jsx (priority: App.jsx)
@@ -218,6 +219,9 @@ function downloadTextFile(content, filename) {
 
 /* =================== APP COMPONENT =================== */
 function App() {
+  /* ---------------- SIDEBAR CONTEXT ---------------- */
+  const { isCollapsed } = useSidebar();
+
   /* ---------------- STATE ---------------- */
   const [messages, setMessages] = useState([
     {
@@ -805,7 +809,7 @@ return;
 
   /* ---------------- RENDER JSX ---------------- */
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col relative">
       {/* HEADER */}
       <header className="border-b border-gray-100 py-3 sm:py-4 md:py-6 px-3 sm:px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
@@ -814,12 +818,11 @@ return;
         </div>
       </header>
 
-      {/* MAIN CHAT AREA - FLEX GROW */}
-      <main className="flex-1 flex flex-col w-full mx-auto overflow-hidden">
+      {/* MAIN CHAT AREA - FLEX GROW WITH BOTTOM PADDING FOR FIXED INPUT */}
+      <main className="flex-1 flex flex-col w-full mx-auto overflow-hidden pb-[350px] lg:pb-[300px]">
         <div
           ref={chatContainerRef}
-          className="flex-1 px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 space-y-3 sm:space-y-4 md:space-y-6 overflow-y-scroll"
-          style={{ maxHeight: "calc(100vh - 250px)" }}
+          className="flex-1 px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 space-y-3 sm:space-y-4 md:space-y-6 overflow-y-auto"
         >
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} w-full`}>
@@ -862,159 +865,175 @@ return;
         </div>
       </main>
 
-      {/* QUICK ACTIONS SECTION - FIXED */}
-      <div className="border-t border-gray-100 bg-white">
-        <div
-          className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition-colors"
-          onClick={() => setQuickActionsOpen(!quickActionsOpen)}
-        >
-          <h3 className="text-gray-600 text-[10px] sm:text-xs md:text-xs font-bold uppercase tracking-wide">Quick Actions</h3>
-          {quickActionsOpen ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
-          )}
-        </div>
-
-        {quickActionsOpen && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6 pt-2 border-b border-gray-100">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-              <button
-                onClick={() => handleQuickAction("File Report")}
-                className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
+      {/* FIXED BOTTOM SECTION - CONTAINS ALL INTERACTIVE ELEMENTS */}
+      <div className={`fixed bottom-16 lg:bottom-0 left-0 right-0 bg-white z-40 shadow-lg border-t border-gray-100 max-h-[70vh] overflow-y-auto transition-all duration-300 ${
+        isCollapsed ? 'lg:left-20' : 'lg:left-64'
+      }`}>
+        
+        {/* DESIGNATION DROPDOWN */}
+        {isFileReportActive && currentFieldKey === "designation" && (
+          <div className="border-b border-gray-200 bg-gray-50 px-3 sm:px-4 md:px-6 py-2">
+            <div className="max-w-7xl mx-auto">
+              <select
+                onChange={(e) => handleFieldSelection(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
               >
-                <FileText className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">File Report</span>
-              </button>
-              <button
-                onClick={() => handleQuickAction("Check Status")}
-                className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
-              >
-                <Activity className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Check Status</span>
-              </button>
-              <button
-                onClick={() => handleQuickAction("Risk Analysis")}
-                className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
-              >
-                <AlertTriangle className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Risk Analysis</span>
-              </button>
-              <button
-                onClick={() => handleQuickAction("Playbooks")}
-                className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
-              >
-                <BookOpen className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Playbooks</span>
-              </button>
+                <option value="">-- Select Designation --</option>
+                <option value="Officer">Officer</option>
+                <option value="Sergeant">Sergeant</option>
+                <option value="Lieutenant">Lieutenant</option>
+                <option value="Captain">Captain</option>
+                <option value="Retired Officer">Retired Officer</option>
+                <option value="Dependent">Dependent</option>
+              </select>
             </div>
           </div>
         )}
 
+        {/* DATE PICKER */}
+        {isFileReportActive && currentFieldKey === "incidentDate" && (
+          <div className="border-b border-gray-200 bg-gray-50 px-3 sm:px-4 md:px-6 py-2">
+            <div className="max-w-7xl mx-auto">
+              <input
+                type="date"
+                onChange={(e) => handleFieldSelection(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* TIME PICKER */}
+        {isFileReportActive && currentFieldKey === "incidentTime" && (
+          <div className="border-b border-gray-200 bg-gray-50 px-3 sm:px-4 md:px-6 py-2">
+            <div className="max-w-7xl mx-auto">
+              <input
+                type="time"
+                onChange={(e) => handleFieldSelection(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* QUICK ACTIONS SECTION */}
+        <div className="border-b border-gray-100">
+          <div
+            className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition-colors"
+            onClick={() => setQuickActionsOpen(!quickActionsOpen)}
+          >
+            <h3 className="text-gray-600 text-[10px] sm:text-xs md:text-xs font-bold uppercase tracking-wide">Quick Actions</h3>
+            {quickActionsOpen ? (
+              <ChevronUp className="w-4 h-4 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            )}
+          </div>
+
+          {quickActionsOpen && (
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6 pt-2 border-t border-gray-100">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
+                <button
+                  onClick={() => handleQuickAction("File Report")}
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
+                >
+                  <FileText className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">File Report</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction("Check Status")}
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
+                >
+                  <Activity className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Check Status</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction("Risk Analysis")}
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
+                >
+                  <AlertTriangle className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Risk Analysis</span>
+                </button>
+                <button
+                  onClick={() => handleQuickAction("Playbooks")}
+                  className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
+                >
+                  <BookOpen className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
+                  <span className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2">Playbooks</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* FILE ATTACHMENTS DISPLAY - PENDING FILES */}
         {pendingFiles.length > 0 && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 border-b border-gray-100">
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {pendingFiles.map(file => (
-                <div key={file.id} className="flex items-center gap-1.5 bg-blue-500 text-white rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
-                  <FileText className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
-                  <span className="text-[10px] sm:text-xs font-medium truncate max-w-[120px] sm:max-w-none">{file.name}</span>
-                  <button
-                    onClick={() => removePendingFile(file.id)}
-                    className="text-blue-100 hover:text-white ml-1"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+          <div className="border-b border-gray-100 px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {pendingFiles.map(file => (
+                  <div key={file.id} className="flex items-center gap-1.5 bg-blue-500 text-white rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs font-medium truncate max-w-[120px] sm:max-w-none">{file.name}</span>
+                    <button
+                      onClick={() => removePendingFile(file.id)}
+                      className="text-blue-100 hover:text-white ml-1"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* FILE ATTACHMENTS DISPLAY - SENT FILES (gray pills) */}
         {messages.some(m => m.attachments?.length > 0) && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 border-b border-gray-100">
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {messages.flatMap(m => m.attachments || []).map(attachment => (
-                <div key={attachment.id} className="flex items-center gap-1.5 bg-gray-100 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
-                  <FileText className="w-3 sm:w-4 h-3 sm:h-4 text-gray-600 flex-shrink-0" />
-                  <span className="text-[10px] sm:text-xs text-gray-700 font-medium truncate max-w-[120px] sm:max-w-none">{attachment.name}</span>
-                  <button className="text-gray-400 hover:text-gray-600 ml-1">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+          <div className="border-b border-gray-100 px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {messages.flatMap(m => m.attachments || []).map(attachment => (
+                  <div key={attachment.id} className="flex items-center gap-1.5 bg-gray-100 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 text-gray-600 flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs text-gray-700 font-medium truncate max-w-[120px] sm:max-w-none">{attachment.name}</span>
+                    <button className="text-gray-400 hover:text-gray-600 ml-1">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
-      </div>
-      {/* DESIGNATION DROPDOWN */}
-{isFileReportActive && currentFieldKey === "designation" && (
-  <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mb-2 sm:mb-3">
-    <select
-      onChange={(e) => handleFieldSelection(e.target.value)}
-      className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
-    >
-      <option value="">-- Select Designation --</option>
-      <option value="Officer">Officer</option>
-      <option value="Sergeant">Sergeant</option>
-      <option value="Lieutenant">Lieutenant</option>
-      <option value="Captain">Captain</option>
-      <option value="Retired Officer">Retired Officer</option>
-      <option value="Dependent">Dependent</option>
-    </select>
-  </div>
-)}
 
-{/* DATE PICKER */}
-{isFileReportActive && currentFieldKey === "incidentDate" && (
-  <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mb-2 sm:mb-3">
-    <input
-      type="date"
-      onChange={(e) => handleFieldSelection(e.target.value)}
-      className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
-    />
-  </div>
-)}
-
-{/* TIME PICKER */}
-{isFileReportActive && currentFieldKey === "incidentTime" && (
-  <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mb-2 sm:mb-3">
-    <input
-      type="time"
-      onChange={(e) => handleFieldSelection(e.target.value)}
-      className="w-full border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500"
-    />
-  </div>
-)}
-
-
-      {/* INPUT AREA - FIXED AT BOTTOM */}
-      <div className="border-t border-gray-100 bg-white px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
-          <label className="cursor-pointer text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
-            <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
+        {/* INPUT AREA - AT BOTTOM OF FIXED SECTION */}
+        <div className="bg-white px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
+            <label className="cursor-pointer text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+              <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => handleSendFiles(e.target.files)}
+              />
+            </label>
             <input
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => handleSendFiles(e.target.files)}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              placeholder="Type your message..."
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-3 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm placeholder-gray-400 focus:outline-none focus:border-blue-300 focus:bg-white transition-colors"
             />
-          </label>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-3 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm placeholder-gray-400 focus:outline-none focus:border-blue-300 focus:bg-white transition-colors"
-          />
-          <button
-            onClick={handleSendMessage}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 sm:p-2.5 transition-colors flex-shrink-0"
-          >
-            <Send className="w-4 sm:w-5 h-4 sm:h-5" />
-          </button>
+            <button
+              onClick={handleSendMessage}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 sm:p-2.5 transition-colors flex-shrink-0"
+            >
+              <Send className="w-4 sm:w-5 h-4 sm:h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

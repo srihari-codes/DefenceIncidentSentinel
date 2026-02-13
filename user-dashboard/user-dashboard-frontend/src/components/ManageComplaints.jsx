@@ -99,10 +99,10 @@ export function ManageComplaints() {
           <div className="mb-8">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h1 className="text-blue-600 mb-2">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">
                   {COMPLAINT_TYPE_LABELS[selectedComplaint.category] || selectedComplaint.category}
                 </h1>
-                <p className="text-gray-600">Tracking ID: {selectedComplaint.tracking_id}</p>
+                <p className="text-gray-500 text-xs sm:text-sm">Tracking ID: {selectedComplaint.tracking_id}</p>
               </div>
               <span className={`px-4 py-2 rounded-full font-semibold ${
                 selectedComplaint.status === COMPLAINT_STATUS.CLOSED
@@ -182,8 +182,8 @@ export function ManageComplaints() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-blue-600 mb-2">Manage Complaints</h1>
-            <p className="text-gray-600">Track and manage cyber complaints</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">Manage Complaints</h1>
+            <p className="text-gray-500 text-xs sm:text-sm">Track and manage cyber complaints</p>
           </div>
 
           <button

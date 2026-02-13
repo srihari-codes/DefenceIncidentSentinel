@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { getComplaintStatistics } from '../api/complaint';
+import { getUserProfile } from '../api/user';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 
@@ -16,28 +17,36 @@ export function Dashboard() {
     active_complaints: 0,
     closed_complaints: 0
   });
+  const [userProfile, setUserProfile] = useState(null);
 
-  // Fetch dashboard statistics
+  // Fetch dashboard statistics and user profile
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const response = await getComplaintStatistics();
+        const [statsResponse, profileResponse] = await Promise.all([
+          getComplaintStatistics(),
+          getUserProfile()
+        ]);
         
-        if (response.success) {
-          setStats(response.data);
+        if (statsResponse.success) {
+          setStats(statsResponse.data);
+        }
+        
+        if (profileResponse.success) {
+          setUserProfile(profileResponse.data);
         }
       } catch (err) {
-        console.error('Failed to fetch statistics:', err);
+        console.error('Failed to fetch data:', err);
         setError('Failed to load dashboard');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
   const handleFileComplaint = () => {
@@ -80,8 +89,10 @@ export function Dashboard() {
   return (
     <div className="p-4 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-blue-600 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's your overview.</p>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">Dashboard</h1>
+        <p className="text-gray-500 text-xs sm:text-sm">
+          Welcome back{userProfile?.full_name ? `, ${userProfile.full_name.split(' ')[0]}` : ''}! Here's your overview.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl">

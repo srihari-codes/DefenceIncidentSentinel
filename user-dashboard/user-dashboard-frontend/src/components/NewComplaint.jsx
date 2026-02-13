@@ -284,16 +284,29 @@ export function NewComplaint() {
         <div className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8">
           <h1 className="text-blue-600 mb-8">Submission Progress</h1>
           
-          <div className="relative">
-            {/* Progress Line Background and Fill */}
-            <div className="absolute left-0 right-0 top-7 h-1 bg-gray-300" style={{ left: '10%', right: '10%' }}></div>
+          <div className="relative px-4">
+            {/* Progress Line Background - connects center of first to last icon */}
             <div 
-              className="absolute left-0 top-7 h-1 bg-blue-600 transition-all duration-300" 
-              style={{ width: `calc(${((currentStep - 1) / 3) * 80}% + 10%)`, left: '10%' }}
+              className="absolute h-1 bg-gray-300" 
+              style={{ 
+                top: '28px',
+                left: '12.5%',
+                right: '12.5%'
+              }}
+            ></div>
+            
+            {/* Progress Line Fill - fills based on current step */}
+            <div 
+              className="absolute h-1 bg-blue-600 transition-all duration-300" 
+              style={{ 
+                top: '28px',
+                left: '12.5%',
+                width: `${((currentStep - 1) / 3) * 75}%`
+              }}
             ></div>
             
             {/* Steps Container */}
-            <div className="relative flex justify-between items-start px-4 py-8">
+            <div className="relative flex justify-between items-start">
               {steps.map((step) => {
                 const Icon = step.icon;
                 const isActive = currentStep >= step.num;
@@ -304,10 +317,9 @@ export function NewComplaint() {
                     key={step.num} 
                     className="flex flex-col items-center cursor-pointer flex-1 relative"
                     onClick={() => handleStepClick(step.num)}
-                    style={{ zIndex: 3 }}
                   >
                     <div
-                      className={`w-14 h-14 rounded-full flex items-center justify-center transition-all flex-shrink-0 relative ${
+                      className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shrink-0 relative ${
                         isCurrent || isActive ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-300 text-gray-500'
                       } ${isCurrent ? 'ring-4 ring-blue-200' : ''} hover:shadow-md hover:scale-105`}
                     >

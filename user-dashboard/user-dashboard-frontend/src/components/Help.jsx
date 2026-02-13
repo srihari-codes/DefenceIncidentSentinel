@@ -72,8 +72,8 @@ export function Help() {
   return (
     <div className="p-4 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-blue-600 mb-2">Help & Support</h1>
-        <p className="text-gray-600">Get assistance and find answers to common questions</p>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">Help & Support</h1>
+        <p className="text-gray-500 text-xs sm:text-sm">Get assistance and find answers to common questions</p>
       </div>
 
       {/* Contact Options */}
