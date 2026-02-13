@@ -93,8 +93,8 @@ const LoginForm = () => {
     setEmail("");
     setEmailError("");
     setPasswordError("");
-    const enforcedMethod = roleConfigurations[roleKey]?.enforcedMfaMethod;
-    setMfaMethod(enforcedMethod ?? "totp");
+    // Default to authenticator (totp) for all roles as it's more secure
+    setMfaMethod("totp");
   };
 
   const handleServiceIdChange = (rawValue: string) => {
@@ -178,12 +178,7 @@ const LoginForm = () => {
   };
 
   const handleMfaMethodChange = (value: string) => {
-    // LENIENT MODE: Allow manual switching even if enforced
-    // if (currentRoleConfig?.enforcedMfaMethod) {
-    //   setMfaMethod(currentRoleConfig.enforcedMfaMethod as "totp" | "email");
-    //   return;
-    // }
-
+    // Allow users to choose their preferred MFA method
     setMfaMethod(value === "email" ? "email" : "totp");
     if (value === "email") {
       clearOtpTimer();
@@ -268,12 +263,7 @@ const LoginForm = () => {
     }
   ];
 
-  useEffect(() => {
-    // LENIENT MODE: Don't auto-switch to enforced method
-    // if (currentRoleConfig?.enforcedMfaMethod && currentRoleConfig.enforcedMfaMethod !== mfaMethod) {
-    //   setMfaMethod(currentRoleConfig.enforcedMfaMethod);
-    // }
-  }, [currentRoleConfig?.enforcedMfaMethod, mfaMethod]);
+  // Removed enforced MFA method logic - users can now choose their preferred method
 
   useEffect(() => {
     if (mfaMethod !== "email") {
@@ -704,16 +694,13 @@ const LoginForm = () => {
               <button
                 type="button"
                 onClick={() => handleMfaMethodChange("email")}
-                className={`rounded-lg border p-4 text-left transition shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
+                className={`rounded-lg border p-4 text-left transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
                   mfaMethod === "email"
                     ? "border-[hsl(213,100%,18%)] bg-[hsl(210,40%,96.1%)]"
                     : "border-[hsl(213,100%,18%)]/20 bg-white"
-                } ${currentRoleConfig?.enforcedMfaMethod === "totp" ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"}`}
+                }`}
                 role="radio"
                 aria-checked={mfaMethod === "email"}
-                // LENIENT MODE: Commented out disabled logic to allow Email OTP for everyone
-                // aria-disabled={currentRoleConfig?.enforcedMfaMethod === "totp"}
-                // disabled={currentRoleConfig?.enforcedMfaMethod === "totp"}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -730,11 +717,9 @@ const LoginForm = () => {
                 </div>
               </button>
             </div>
-            {currentRoleConfig?.enforcedMfaMethod === "totp" && (
-              <p className="text-xs text-[hsl(0,0%,45%)]">
-                Authenticator-based MFA is enforced for this role.
-              </p>
-            )}
+            <p className="text-xs text-[hsl(0,0%,45%)]">
+              Authenticator app (TOTP) is recommended for higher security.
+            </p>
           </div>
 
           {mfaMethod === "email" && (
@@ -1077,11 +1062,9 @@ const LoginForm = () => {
               )}
             </div>
 
-            {currentRoleConfig?.enforcedMfaMethod && (
-              <div className="bg-[hsl(210,40%,96.1%)] border border-[hsl(213,100%,18%)]/15 rounded-lg p-3 text-xs text-[hsl(0,0%,31%)]">
-                Multi-factor authentication is mandatory for the selected role. Authenticator enforcement applies where specified.
-              </div>
-            )}
+            <div className="bg-[hsl(210,40%,96.1%)] border border-[hsl(213,100%,18%)]/15 rounded-lg p-3 text-xs text-[hsl(0,0%,31%)]">
+              Multi-factor authentication is mandatory for all roles to ensure secure access.
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>

@@ -622,8 +622,8 @@ const RegisterForm = () => {
     setOtpSent(false);
     setOtpCountdown(0);
     evaluateEmailAgainstRole(roleConfigurations[roleKey], undefined, roleKey);
-    const enforcedMethod = roleConfigurations[roleKey]?.enforcedMfaMethod;
-    setMfaMethod(enforcedMethod ?? "totp");
+    // Default to authenticator (totp) for all roles as it's more secure
+    setMfaMethod("totp");
   };
 
   const handleServiceIdChange = (rawValue: string) => {
@@ -635,11 +635,7 @@ const RegisterForm = () => {
   };
 
   const handleMfaMethodChange = (value: string) => {
-    if (currentRoleConfig?.enforcedMfaMethod) {
-      setMfaMethod(currentRoleConfig.enforcedMfaMethod as "totp" | "email");
-      return;
-    }
-
+    // Allow users to choose their preferred MFA method
     setMfaMethod(value === "email" ? "email" : "totp");
     if (value === "email") {
       setEmailOtp("");
@@ -732,11 +728,7 @@ const RegisterForm = () => {
     return null;
   };
 
-  useEffect(() => {
-    if (currentRoleConfig?.enforcedMfaMethod && mfaMethod !== currentRoleConfig.enforcedMfaMethod) {
-      setMfaMethod(currentRoleConfig.enforcedMfaMethod);
-    }
-  }, [currentRoleConfig?.enforcedMfaMethod, mfaMethod]);
+  // Removed enforced MFA method logic - users can now choose their preferred method
 
   useEffect(() => {
     if (!showMFASetup || mfaMethod !== "email") {
@@ -1501,7 +1493,7 @@ const RegisterForm = () => {
               <button
                 type="button"
                 onClick={() => handleMfaMethodChange("totp")}
-                className={`rounded-lg border p-4 text-left transition shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
+                className={`rounded-lg border p-4 text-left transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
                   mfaMethod === "totp"
                     ? "border-[hsl(213,100%,18%)] bg-[hsl(210,40%,96.1%)]"
                     : "border-[hsl(213,100%,18%)]/20 bg-white"
@@ -1529,15 +1521,13 @@ const RegisterForm = () => {
               <button
                 type="button"
                 onClick={() => handleMfaMethodChange("email")}
-                className={`rounded-lg border p-4 text-left transition shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
+                className={`rounded-lg border p-4 text-left transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
                   mfaMethod === "email"
                     ? "border-[hsl(213,100%,18%)] bg-[hsl(210,40%,96.1%)]"
                     : "border-[hsl(213,100%,18%)]/20 bg-white"
-                } ${currentRoleConfig?.enforcedMfaMethod === "totp" ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"}`}
+                }`}
                 role="radio"
                 aria-checked={mfaMethod === "email"}
-                aria-disabled={currentRoleConfig?.enforcedMfaMethod === "totp"}
-                disabled={currentRoleConfig?.enforcedMfaMethod === "totp"}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -1557,9 +1547,7 @@ const RegisterForm = () => {
               </button>
             </div>
             <p className="text-xs text-[hsl(0,0%,31%)]">
-              {currentRoleConfig?.enforcedMfaMethod === "totp"
-                ? "Authenticator-based MFA is enforced for this role."
-                : "TOTP offers higher security and works offline"}
+              Authenticator app (TOTP) is recommended for higher security and works offline.
             </p>
           </div>
 

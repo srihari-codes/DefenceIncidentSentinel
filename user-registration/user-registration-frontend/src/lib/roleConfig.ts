@@ -51,7 +51,6 @@ export const roleConfigurations: Record<RoleKey, RoleConfig> = {
       requireSpecialCharacter: true,
       message: "Minimum 12 characters for secure access.",
     },
-    enforcedMfaMethod: "email",
     securityNotes: ["Verification may require PPO/Card confirmation."],
   },
   veteran: {
@@ -65,7 +64,6 @@ export const roleConfigurations: Record<RoleKey, RoleConfig> = {
       requireSpecialCharacter: true,
       message: "Strong password required for veteran portal.",
     },
-    enforcedMfaMethod: "email",
     securityNotes: ["Access to pension and retirement benefits."],
   },
   cert: {
