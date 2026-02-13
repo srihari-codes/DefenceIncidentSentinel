@@ -131,7 +131,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                     <User className="h-4 w-4 text-primary-foreground" />
                   </div>
-                  <span className="text-sm font-medium hidden sm:block">Sajith</span>
+                  <span className="text-sm font-medium hidden sm:block">Titus</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">

@@ -35,13 +35,10 @@ const IDENTIFIER_PATTERNS = {
   admin: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ // Any email as identifier
 };
 
-// MFA methods enforced by role
+// MFA methods enforced by role (REMOVED - users can now choose)
+// All users can choose between TOTP or EMAIL for better flexibility
 const ENFORCED_MFA = {
-  personnel: 'TOTP',
-  family: 'EMAIL',
-  veteran: 'EMAIL',
-  cert: 'TOTP',
-  admin: 'TOTP'
+  // No enforcement - users have freedom to choose
 };
 
 // Valid roles
@@ -144,19 +141,13 @@ function validatePassword(password) {
  * @returns {{ valid: boolean, error?: string }}
  */
 function validateMfaMethodForRole(mfaMethod, role) {
-  const enforced = ENFORCED_MFA[role];
+  // Removed enforcement - allow all users to choose their preferred MFA method
   
   if (!VALID_MFA_METHODS.includes(mfaMethod)) {
     return { valid: false, error: 'Invalid MFA method. Must be TOTP or EMAIL' };
   }
   
-  if (enforced && mfaMethod !== enforced) {
-    return { 
-      valid: false, 
-      error: `${enforced} is required for ${role} role` 
-    };
-  }
-  
+  // Allow any MFA method for all roles
   return { valid: true };
 }
 

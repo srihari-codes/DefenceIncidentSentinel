@@ -160,9 +160,9 @@ async function serviceStep(req, res) {
   try {
     const { role, identifier } = req.body;
     
-    // Verify challenge cookie
+    // Verify challenge cookie exists (allow any stage for back button support)
     const challenge = getRegistrationChallenge(req);
-    if (!challenge || challenge.stage !== 'IDENTITY') {
+    if (!challenge || !challenge.email_verified) {
       return res.status(403).json({
         error: {
           message: 'Invalid registration state. Please start over.',
@@ -297,9 +297,9 @@ async function securityStep(req, res) {
   try {
     const { password, mfa_method, terms_accepted } = req.body;
     
-    // Verify challenge cookie
+    // Verify challenge cookie (allow IDENTITY or higher stages for back button support)
     const challenge = getRegistrationChallenge(req);
-    if (!challenge || challenge.stage !== 'SERVICE') {
+    if (!challenge || !challenge.email_verified || !challenge.role || !challenge.identifier) {
       return res.status(403).json({
         error: {
           message: 'Invalid registration state. Please start over.',
@@ -379,9 +379,9 @@ async function activateStep(req, res) {
   try {
     const { action, totp_verification_code, email_otp_code } = req.body;
     
-    // Verify challenge cookie
+    // Verify challenge cookie (allow SERVICE or higher stages for back button support)
     const challenge = getRegistrationChallenge(req);
-    if (!challenge || challenge.stage !== 'SECURITY') {
+    if (!challenge || !challenge.email_verified || !challenge.role || !challenge.identifier || !challenge.password_hash) {
       return res.status(403).json({
         error: {
           message: 'Invalid registration state. Please start over.',

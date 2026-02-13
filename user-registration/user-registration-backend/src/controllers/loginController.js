@@ -157,9 +157,9 @@ async function passwordStep(req, res) {
       });
     }
     
-    // Verify challenge cookie
+    // Verify challenge cookie (allow any stage for back button support)
     const challenge = getLoginChallenge(req);
-    if (!challenge || challenge.stage !== 'IDENTITY') {
+    if (!challenge || !challenge.uid) {
       return res.status(403).json({
         error: {
           message: 'Invalid authentication state. Please start over.',
@@ -261,9 +261,9 @@ async function mfaStep(req, res) {
   try {
     const { method, code, action } = req.body;
     
-    // Verify challenge cookie
+    // Verify challenge cookie (allow IDENTITY or higher stages for back button support)
     const challenge = getLoginChallenge(req);
-    if (!challenge || challenge.stage !== 'PASSWORD') {
+    if (!challenge || !challenge.uid || !challenge.password_verified) {
       return res.status(403).json({
         error: {
           message: 'Invalid authentication state. Please start over.',

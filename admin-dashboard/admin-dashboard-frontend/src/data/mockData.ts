@@ -79,7 +79,7 @@ export const mockCases: Case[] = [
     status: "In Progress",
     priority: "High",
     deadline: "2024-03-20",
-    assignedAnalyst: "Sajith",
+    assignedAnalyst: "Titus",
     caseType: "Unauthorized Access",
     description: "Suspicious login attempt detected from unknown IP range 192.168.1.50 on production database server.",
     user: {
@@ -94,8 +94,8 @@ export const mockCases: Case[] = [
     ],
     timeline: [
       { event: "Case created", timestamp: "2024-03-10 09:00", user: "System" },
-      { event: "Assigned to Sajith", timestamp: "2024-03-10 09:15", user: "Admin" },
-      { event: "Analysis started", timestamp: "2024-03-10 10:30", user: "Sajith" }
+      { event: "Assigned to Titus", timestamp: "2024-03-10 09:15", user: "Admin" },
+      { event: "Analysis started", timestamp: "2024-03-10 10:30", user: "Titus" }
     ]
   },
   {
@@ -152,7 +152,7 @@ export const mockCases: Case[] = [
     status: "In Progress",
     priority: "Medium",
     deadline: "2024-03-25",
-    assignedAnalyst: "Sajith",
+    assignedAnalyst: "Titus",
     caseType: "Data Leakage",
     description: "Potential data exfiltration detected in outbound DNS traffic. High volume of TXT queries.",
     user: {
@@ -166,7 +166,7 @@ export const mockCases: Case[] = [
     ],
     timeline: [
       { event: "Case created", timestamp: "2024-03-12 08:45", user: "System" },
-      { event: "Assigned to Sajith", timestamp: "2024-03-12 09:00", user: "Admin" }
+      { event: "Assigned to Titus", timestamp: "2024-03-12 09:00", user: "Admin" }
     ]
   }
 ];
@@ -247,7 +247,7 @@ export const mockAlerts: Alert[] = [
 export const mockMessages: Message[] = [
   {
     id: "MSG-001",
-    sender: "Sajith",
+    sender: "Titus",
     recipient: "Sarah Williams",
     content: "Hi Sarah, I'm looking into the unauthorized access report. Can you confirm if you were trying to log in at 02:00 UTC?",
     timestamp: "2024-03-10 11:00",
@@ -256,7 +256,7 @@ export const mockMessages: Message[] = [
   {
     id: "MSG-002",
     sender: "Sarah Williams",
-    recipient: "Sajith",
+    recipient: "Titus",
     content: "No, I was asleep at that time. That definitely wasn't me.",
     timestamp: "2024-03-10 11:45",
     type: "received"
