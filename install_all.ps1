@@ -1,12 +1,12 @@
 # Install Dependencies Script for Defence Incident Sentinel
 
 $directories = @(
-    "d:\checking\user-registration\user-registration-backend",
-    "d:\checking\user-dashboard\user-dashboard-backend",
-    "d:\checking\user-registration\user-registration-frontend",
-    "d:\checking\user-dashboard\user-dashboard-frontend",
-    "d:\checking\cert-command-center\cert-command-center-frontend",
-    "d:\checking\admin-dashboard\admin-dashboard-frontend"
+    "C:\DefenceIncidentSentinel\user-registration\user-registration-backend",
+    "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-backend",
+    "C:\DefenceIncidentSentinel\user-registration\user-registration-frontend",
+    "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-frontend",
+    "C:\DefenceIncidentSentinel\cert-command-center\cert-command-center-frontend",
+    "C:\DefenceIncidentSentinel\admin-dashboard\admin-dashboard-frontend"
 )
 
 Write-Host "--- Starting Dependency Installation ---" -ForegroundColor Cyan
