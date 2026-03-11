@@ -233,7 +233,8 @@ async function passwordStep(req, res) {
       uid: user.user_id,
       role: user.role,
       stage: 'PASSWORD',
-      mfaMethod: user.mfa_method
+      mfaMethod: user.mfa_method,
+      password_verified: true
     });
     
     return res.status(200).json({
