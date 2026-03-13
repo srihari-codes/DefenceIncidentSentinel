@@ -1,12 +1,15 @@
 # Start All Services Script for Defence Incident Sentinel
 
+# Set this to the folder where the repo is cloned.
+$repoRoot = "C:\Users\benny\Downloads\Bennyhinn\SIH"
+
 $services = @(
-    @{ name = "Registration Backend (Port 4000)"; path = "C:\DefenceIncidentSentinel\user-registration\user-registration-backend"; command = "npm start"; port = 4000 },
-    @{ name = "Dashboard Backend (Port 4001)"; path = "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-backend"; command = "npm start"; port = 4001 },
-    @{ name = "Registration Frontend (Port 5173)"; path = "C:\DefenceIncidentSentinel\user-registration\user-registration-frontend"; command = "npm run dev"; port = 5173 },
-    @{ name = "Dashboard Frontend (Port 5174)"; path = "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-frontend"; command = "npm run dev"; port = 5174 },
-    @{ name = "CERT Command Center (Port 5175)"; path = "C:\DefenceIncidentSentinel\cert-command-center\cert-command-center-frontend"; command = "npm run dev"; port = 5175 },
-    @{ name = "Admin Dashboard (Port 5176)"; path = "C:\DefenceIncidentSentinel\admin-dashboard\admin-dashboard-frontend"; command = "npm run dev"; port = 5176 }
+    @{ name = "Registration Backend (Port 4000)"; path = "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-backend"; command = "npm start"; port = 4000 },
+    @{ name = "Dashboard Backend (Port 4001)"; path = "$repoRoot\DefenceIncidentSentinel\user-dashboard\user-dashboard-backend"; command = "npm start"; port = 4001 },
+    @{ name = "Registration Frontend (Port 5173)"; path = "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-frontend"; command = "npm run dev"; port = 5173 },
+    @{ name = "Dashboard Frontend (Port 5174)"; path = "$repoRoot\DefenceIncidentSentinel\user-dashboard\user-dashboard-frontend"; command = "npm run dev"; port = 5174 },
+    @{ name = "CERT Command Center (Port 5175)"; path = "$repoRoot\DefenceIncidentSentinel\cert-command-center\cert-command-center-frontend"; command = "npm run dev"; port = 5175 },
+    @{ name = "Admin Dashboard (Port 5176)"; path = "$repoRoot\DefenceIncidentSentinel\admin-dashboard\admin-dashboard-frontend"; command = "npm run dev"; port = 5176 }
 )
 
 Write-Host "--- Port Cleanup ---" -ForegroundColor Yellow

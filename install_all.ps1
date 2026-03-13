@@ -1,12 +1,15 @@
 # Install Dependencies Script for Defence Incident Sentinel
 
+# Set this to the folder where the repo is cloned.
+$repoRoot = "C:\Users\benny\Downloads\Bennyhinn\SIH"
+
 $directories = @(
-    "C:\DefenceIncidentSentinel\user-registration\user-registration-backend",
-    "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-backend",
-    "C:\DefenceIncidentSentinel\user-registration\user-registration-frontend",
-    "C:\DefenceIncidentSentinel\user-dashboard\user-dashboard-frontend",
-    "C:\DefenceIncidentSentinel\cert-command-center\cert-command-center-frontend",
-    "C:\DefenceIncidentSentinel\admin-dashboard\admin-dashboard-frontend"
+    "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-backend",
+    "$repoRoot\DefenceIncidentSentinel\user-dashboard\user-dashboard-backend",
+    "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-frontend",
+    "$repoRoot\DefenceIncidentSentinel\user-dashboard\user-dashboard-frontend",
+    "$repoRoot\DefenceIncidentSentinel\cert-command-center\cert-command-center-frontend",
+    "$repoRoot\DefenceIncidentSentinel\admin-dashboard\admin-dashboard-frontend"
 )
 
 Write-Host "--- Starting Dependency Installation ---" -ForegroundColor Cyan
