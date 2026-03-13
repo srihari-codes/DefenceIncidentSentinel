@@ -66,6 +66,7 @@ const LoginForm = () => {
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
+  const [devOtpHint, setDevOtpHint] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
@@ -126,9 +127,9 @@ const LoginForm = () => {
     }
   };
 
-  const startOtpCountdown = () => {
+  const startOtpCountdown = (durationSeconds = 60) => {
     clearOtpTimer();
-    setOtpCountdown(60);
+    setOtpCountdown(durationSeconds);
     otpTimerRef.current = setInterval(() => {
       setOtpCountdown((prev) => {
         if (prev <= 1) {
@@ -152,12 +153,24 @@ const LoginForm = () => {
         setOtpCode("");
         // Use server's expiresIn or default to 300 seconds (5 min)
         const expiresIn = result.data.expiresIn || 300;
-        setOtpCountdown(expiresIn);
-        startOtpCountdown();
-        toast({
-          title: "OTP Sent",
-          description: result.data.message || "A one-time code has been sent to your email.",
-        });
+        startOtpCountdown(expiresIn);
+
+        if ((result.data as unknown as { deliveryMode?: string; devOtp?: string }).deliveryMode === "mock" &&
+            (result.data as unknown as { deliveryMode?: string; devOtp?: string }).devOtp) {
+          const otp = (result.data as unknown as { deliveryMode?: string; devOtp?: string }).devOtp as string;
+          setDevOtpHint(otp);
+          setOtpCode(otp);
+          toast({
+            title: "OTP Generated (Development Mode)",
+            description: `Mock mode is enabled. Use OTP: ${otp}`,
+          });
+        } else {
+          setDevOtpHint("");
+          toast({
+            title: "OTP Sent",
+            description: result.data.message || "A one-time code has been sent to your email.",
+          });
+        }
       } else {
         toast({
           title: "Failed to Send OTP",
@@ -185,11 +198,13 @@ const LoginForm = () => {
       setOtpSent(false);
       setOtpCountdown(0);
       setOtpCode("");
+      setDevOtpHint("");
     } else {
       clearOtpTimer();
       setOtpSent(false);
       setOtpCountdown(0);
       setOtpCode("");
+      setDevOtpHint("");
     }
   };
 
@@ -471,6 +486,7 @@ const LoginForm = () => {
         setOtpSent(false);
         setOtpCountdown(0);
         setOtpCode("");
+        setDevOtpHint("");
         toast({
           title: "Password Verified",
           description: "Please complete MFA authentication.",
@@ -551,6 +567,7 @@ const LoginForm = () => {
         clearOtpTimer();
         setOtpCountdown(0);
         setOtpSent(false);
+        setDevOtpHint("");
         
         // Check for authorization code flow (new backend flow)
         if (result.data.redirect_url && result.data.code) {
@@ -858,6 +875,11 @@ const LoginForm = () => {
                           )}
                           aria-hidden="true"
                         />
+                        {devOtpHint && (
+                          <p className="text-xs text-[hsl(207,90%,45%)]">
+                            Development mode OTP: <span className="font-mono font-semibold tracking-wider">{devOtpHint}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}

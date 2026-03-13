@@ -67,9 +67,13 @@ async function apiCall<T>(
     const result = await response.json();
 
     if (!response.ok) {
+      const backendError = result?.error;
       return {
         success: false,
-        error: { message: result.message || "Request failed", code: result.code },
+        error: {
+          message: backendError?.message || result?.message || "Request failed",
+          code: backendError?.code || result?.code,
+        },
       };
     }
 

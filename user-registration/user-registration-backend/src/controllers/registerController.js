@@ -72,12 +72,34 @@ async function identityStep(req, res) {
       const hashedOtp = await bcrypt.hash(otp, 10);
       
       await OTPSession.createOTP(normalizedEmail, hashedOtp, 'email_verification', 5);
-      await sendVerificationOTP(normalizedEmail, otp);
-      
-      return res.status(200).json({
+
+      let deliveryResult;
+      try {
+        deliveryResult = await sendVerificationOTP(normalizedEmail, otp);
+      } catch (error) {
+        if (error.code === 'EMAIL_NOT_CONFIGURED') {
+          return res.status(503).json({
+            error: {
+              message: error.message,
+              code: error.code
+            }
+          });
+        }
+        throw error;
+      }
+
+      const responsePayload = {
         message: 'Verification code sent to your email',
-        expiresIn: 300
-      });
+        expiresIn: 300,
+        deliveryMode: deliveryResult.deliveryMode || 'smtp'
+      };
+
+      if (config.nodeEnv === 'development' && deliveryResult.otpPreview) {
+        responsePayload.devOtp = deliveryResult.otpPreview;
+        responsePayload.message = 'Verification code generated (development mode).';
+      }
+
+      return res.status(200).json(responsePayload);
     }
     
     // Step 1b: Verify OTP and create registration challenge
@@ -108,7 +130,7 @@ async function identityStep(req, res) {
     if (!otpSession) {
       return res.status(400).json({
         error: {
-          message: 'OTP expired or invalid. Please request a new code.',
+          message: 'No active OTP found for this email. Please request a new code and use the latest 6-digit OTP.',
           code: 'OTP_EXPIRED'
         }
       });
@@ -526,7 +548,19 @@ async function activateStep(req, res) {
         const hashedOtp = await bcrypt.hash(otp, 10);
         
         await OTPSession.createOTP(challenge.email, hashedOtp, 'registration', 5);
-        await sendActivationOTP(challenge.email, otp);
+        try {
+          await sendActivationOTP(challenge.email, otp);
+        } catch (error) {
+          if (error.code === 'EMAIL_NOT_CONFIGURED') {
+            return res.status(503).json({
+              error: {
+                message: error.message,
+                code: error.code
+              }
+            });
+          }
+          throw error;
+        }
         
         return res.status(200).json({
           message: 'Activation OTP sent to your email',

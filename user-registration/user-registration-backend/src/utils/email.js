@@ -1,35 +1,20 @@
 const nodemailer = require('nodemailer');
 const config = require('../config/env');
 
-// In development, we use a mock transport that logs to console
 const isDevelopment = config.nodeEnv === 'development';
+const forceRealEmail = process.env.USE_REAL_EMAIL === 'true';
+const forceMockEmail = process.env.USE_MOCK_EMAIL === 'true' || process.env.ALLOW_MOCK_EMAIL === 'true';
 
 // Create transporter based on configuration and environment
 let transporter;
 
 // Check if SMTP configuration is provided (even in development)
-const hasSmtpConfig = config.smtp.user && config.smtp.password && config.smtp.host;
+const hasSmtpConfig = Boolean(config.smtp.user && config.smtp.password && config.smtp.host);
+const useSmtpTransport = hasSmtpConfig && (!isDevelopment || forceRealEmail || !forceMockEmail);
+const useMockTransport = !useSmtpTransport && forceMockEmail;
 
-if (isDevelopment && process.env.USE_REAL_EMAIL !== 'true') {
-  // Development (Default): Log emails to console
-  transporter = {
-    sendMail: async (mailOptions) => {
-      console.log('\n========== EMAIL (Development Mode) ==========');
-      console.log(`To: ${mailOptions.to}`);
-      console.log(`Subject: ${mailOptions.subject}`);
-      console.log(`Body:\n${mailOptions.text || mailOptions.html}`);
-      console.log('==============================================\n');
-      
-      // If SMTP config is present, also suggest switching to it
-      if (hasSmtpConfig) {
-        console.log('TIP: To send real emails in development, set USE_REAL_EMAIL=true in your .env\n');
-      }
-      
-      return { messageId: 'dev-message-id' };
-    }
-  };
-} else {
-  // Production or explicitly enabled development SMTP
+if (useSmtpTransport) {
+  // SMTP transport for production and configured development
   transporter = nodemailer.createTransport({
     host: config.smtp.host,
     port: config.smtp.port,
@@ -39,10 +24,27 @@ if (isDevelopment && process.env.USE_REAL_EMAIL !== 'true') {
       pass: config.smtp.password
     }
   });
+} else if (useMockTransport) {
+  // Optional development fallback: log emails to console
+  transporter = {
+    sendMail: async (mailOptions) => {
+      console.log('\n========== EMAIL (Development Mode) ==========');
+      console.log(`To: ${mailOptions.to}`);
+      console.log(`Subject: ${mailOptions.subject}`);
+      console.log(`Body:\n${mailOptions.text || mailOptions.html}`);
+      console.log('==============================================\n');
+
+      return { messageId: 'dev-message-id', mockDelivery: true };
+    }
+  };
+} else {
+  transporter = null;
 }
 
-// Mandatory SMTP Debug Test
-if (transporter.verify) {
+console.log(`[EmailService] Transport mode: ${useSmtpTransport ? 'smtp' : useMockTransport ? 'mock' : 'not-configured'}`);
+
+// SMTP Debug Test
+if (useSmtpTransport && transporter.verify) {
   transporter.verify()
     .then(() => console.log("SMTP authentication successful"))
     .catch((err) => {
@@ -53,12 +55,35 @@ if (transporter.verify) {
     });
 }
 
+function ensureEmailTransportConfigured() {
+  if (!transporter) {
+    const err = new Error('Email OTP delivery is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASSWORD, and optionally SMTP_FROM.');
+    err.code = 'EMAIL_NOT_CONFIGURED';
+    throw err;
+  }
+}
+
+function buildFromAddress() {
+  const senderAddress = config.smtp.from || config.smtp.user || 'noreply@defence.local';
+  return `"Defence Incident Sentinel" <${senderAddress}>`;
+}
+
+function withDeliveryMeta(result, otp) {
+  const mockDelivery = Boolean(result && result.mockDelivery);
+  return {
+    ...result,
+    deliveryMode: mockDelivery ? 'mock' : 'smtp',
+    ...(mockDelivery ? { otpPreview: otp } : {})
+  };
+}
+
 /**
  * Send email verification OTP
  */
 async function sendVerificationOTP(email, otp) {
+  ensureEmailTransportConfigured();
   const mailOptions = {
-    from: `"Defence Incident Sentinel" <noreply@gov.in>`,
+    from: buildFromAddress(),
     to: email,
     subject: 'Defence Incident Sentinel - Email Verification',
     text: `Your verification code is: ${otp}\n\nThis code is valid for 5 minutes.\n\nIf you did not request this code, please ignore this email.`,
@@ -80,7 +105,7 @@ async function sendVerificationOTP(email, otp) {
   try {
     const result = await transporter.sendMail(mailOptions);
     console.info(`[EmailService] Verification OTP successfully dispatched to ${email}. ID: ${result.messageId}`);
-    return result;
+    return withDeliveryMeta(result, otp);
   } catch (error) {
     console.error(`[EmailService] Delivery FAILURE to ${email} (Verification OTP):`, error);
     throw error;
@@ -91,8 +116,10 @@ async function sendVerificationOTP(email, otp) {
  * Send login MFA OTP
  */
 async function sendLoginOTP(email, otp) {
+  console.log(`[EmailService] Sending Login OTP to ${email}`);
+  ensureEmailTransportConfigured();
   const mailOptions = {
-    from: `"Defence Incident Sentinel" <noreply@gov.in>`,
+    from: buildFromAddress(),
     to: email,
     subject: 'Defence Incident Sentinel - Login OTP',
     text: `Your login OTP is: ${otp}\n\nThis code is valid for 5 minutes.\n\nIf you did not attempt to login, please change your password immediately.`,
@@ -112,11 +139,12 @@ async function sendLoginOTP(email, otp) {
   };
 
   try {
+    console.log(`[EmailService] Attempting to send via transporter...`);
     const result = await transporter.sendMail(mailOptions);
-    console.info(`[EmailService] Login OTP successfully dispatched to ${email}. ID: ${result.messageId}`);
-    return result;
+    console.info(`[EmailService] ✓ Login OTP successfully sent to ${email}. MessageID: ${result.messageId}`);
+    return withDeliveryMeta(result, otp);
   } catch (error) {
-    console.error(`[EmailService] Delivery FAILURE to ${email} (Login OTP):`, error);
+    console.error(`[EmailService] ✗ FAILED to send Login OTP to ${email}:`, error.message);
     throw error;
   }
 }
@@ -125,8 +153,9 @@ async function sendLoginOTP(email, otp) {
  * Send activation OTP for registration
  */
 async function sendActivationOTP(email, otp) {
+  ensureEmailTransportConfigured();
   const mailOptions = {
-    from: `"Defence Incident Sentinel" <noreply@gov.in>`,
+    from: buildFromAddress(),
     to: email,
     subject: 'Defence Incident Sentinel - Activation OTP',
     text: `Your activation OTP is: ${otp}\n\nThis code is valid for 5 minutes.\n\nComplete your registration to access the Defence Incident Sentinel.`,
@@ -148,7 +177,7 @@ async function sendActivationOTP(email, otp) {
   try {
     const result = await transporter.sendMail(mailOptions);
     console.info(`[EmailService] Activation OTP successfully dispatched to ${email}. ID: ${result.messageId}`);
-    return result;
+    return withDeliveryMeta(result, otp);
   } catch (error) {
     console.error(`[EmailService] Delivery FAILURE to ${email} (Activation OTP):`, error);
     throw error;

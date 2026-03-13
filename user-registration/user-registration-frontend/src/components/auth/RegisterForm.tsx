@@ -88,6 +88,7 @@ const RegisterForm = () => {
   const [emailVerificationCountdown, setEmailVerificationCountdown] = useState(0);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [emailVerificationError, setEmailVerificationError] = useState("");
+  const [devOtpHint, setDevOtpHint] = useState("");
   const emailVerificationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
 
@@ -304,7 +305,7 @@ const RegisterForm = () => {
         )}
       </div>
     ),
-    [RoleAvatarIconComponent, currentStepTitle, email, fullName, idLabel, initials, isTotpSetupActive, isVerifying, maskedMobile, previewStage, progressPercentage, roleDisplayName, serviceId]
+    [RoleAvatarIconComponent, currentStepTitle, email, fullName, idLabel, initials, isTotpSetupActive, isVerifying, maskedMobile, previewStage, progressPercentage, roleDisplayName, serviceId, totpSetup]
   );
 
   const hasStartedFilling = useMemo(
@@ -348,9 +349,9 @@ const RegisterForm = () => {
     }
   };
 
-  const startEmailVerificationCountdown = () => {
+  const startEmailVerificationCountdown = (durationSeconds = 60) => {
     clearEmailVerificationTimer();
-    setEmailVerificationCountdown(60);
+    setEmailVerificationCountdown(durationSeconds);
     emailVerificationTimerRef.current = setInterval(() => {
       setEmailVerificationCountdown((prev) => {
         if (prev <= 1) {
@@ -392,12 +393,22 @@ const RegisterForm = () => {
         setEmailVerificationSent(true);
         setIsEmailVerified(false);
         const expiresIn = result.data.expiresIn || 300;
-        setEmailVerificationCountdown(expiresIn);
-        startEmailVerificationCountdown();
-        toast({
-          title: "Verification Code Sent",
-          description: result.data.message || `A 6-digit verification code has been sent to ${email}.`,
-        });
+        startEmailVerificationCountdown(expiresIn);
+
+        if (result.data.deliveryMode === "mock" && result.data.devOtp) {
+          setEmailVerificationOtp(result.data.devOtp);
+          setDevOtpHint(result.data.devOtp);
+          toast({
+            title: "OTP Generated (Development Mode)",
+            description: `Email delivery is running in mock mode. Use OTP: ${result.data.devOtp}`,
+          });
+        } else {
+          setDevOtpHint("");
+          toast({
+            title: "Verification Code Sent",
+            description: result.data.message || `A 6-digit verification code has been sent to ${email}.`,
+          });
+        }
       } else {
         toast({
           title: "Failed to Send Code",
@@ -438,6 +449,7 @@ const RegisterForm = () => {
         clearEmailVerificationTimer();
         setIsEmailVerified(true);
         setEmailVerificationError("");
+        setDevOtpHint("");
         toast({
           title: "Email Verified",
           description: result.data.message || "Your email has been successfully verified.",
@@ -515,6 +527,7 @@ const RegisterForm = () => {
       setEmailVerificationSent(false);
       setEmailVerificationOtp("");
       setEmailVerificationError("");
+      setDevOtpHint("");
       clearEmailVerificationTimer();
       setEmailVerificationCountdown(0);
     }
@@ -1154,6 +1167,11 @@ const RegisterForm = () => {
                     />
                     {emailVerificationError && (
                       <p className="text-xs text-[hsl(0,84%,60%)]">{emailVerificationError}</p>
+                    )}
+                    {devOtpHint && (
+                      <p className="text-xs text-[hsl(207,90%,45%)]">
+                        Development mode OTP: <span className="font-mono font-semibold tracking-wider">{devOtpHint}</span>
+                      </p>
                     )}
                   </div>
                   

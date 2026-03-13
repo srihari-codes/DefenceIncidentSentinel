@@ -297,17 +297,37 @@ async function mfaStep(req, res) {
       //   });
       // }
       
-      // Generate and send OTP
-      const otp = generateOTP();
-      const hashedOtp = await bcrypt.hash(otp, 10);
-      
-      await OTPSession.createOTP(user.email, hashedOtp, 'login_mfa', 5);
-      await sendLoginOTP(user.email, otp);
-      
-      return res.status(200).json({
-        message: 'OTP sent to your email',
-        expiresIn: 300
-      });
+      try {
+        // Generate and send OTP
+        const otp = generateOTP();
+        const hashedOtp = await bcrypt.hash(otp, 10);
+
+        await OTPSession.createOTP(user.email, hashedOtp, 'login_mfa', 5);
+        const deliveryResult = await sendLoginOTP(user.email, otp);
+
+        const payload = {
+          message: 'OTP sent to your email',
+          expiresIn: 300,
+          deliveryMode: deliveryResult.deliveryMode || 'smtp'
+        };
+
+        if (config.nodeEnv === 'development' && deliveryResult.otpPreview) {
+          payload.devOtp = deliveryResult.otpPreview;
+          payload.message = 'OTP generated (development mode).';
+        }
+
+        return res.status(200).json(payload);
+      } catch (error) {
+        if (error.code === 'EMAIL_NOT_CONFIGURED') {
+          return res.status(503).json({
+            error: {
+              message: error.message,
+              code: error.code
+            }
+          });
+        }
+        throw error;
+      }
     }
     
     // Verify code is provided for verification
@@ -321,10 +341,12 @@ async function mfaStep(req, res) {
     }
     
     let isCodeValid = false;
+    let resolvedMethod = method;
     
     // Handle TOTP verification
     // LENIENT MODE: Prioritize requested method over challenge default
     if (method === 'TOTP' || (!method && challenge.mfaMethod === 'TOTP')) {
+      resolvedMethod = 'TOTP';
       if (!user.totp_secret) {
         return res.status(400).json({
           error: {
@@ -349,6 +371,7 @@ async function mfaStep(req, res) {
     }
     // Handle EMAIL OTP verification
     else if (method === 'EMAIL' || (!method && challenge.mfaMethod === 'EMAIL')) {
+      resolvedMethod = 'EMAIL';
       const otpSession = await OTPSession.findLatestValid(user.email, 'login_mfa');
       
       if (!otpSession) {
@@ -376,8 +399,8 @@ async function mfaStep(req, res) {
     if (!isCodeValid) {
       return res.status(401).json({
         error: {
-          message: 'Invalid verification code',
-          code: 'INVALID_TOTP'
+          message: resolvedMethod === 'EMAIL' ? 'Invalid OTP code' : 'Invalid verification code',
+          code: resolvedMethod === 'EMAIL' ? 'INVALID_OTP' : 'INVALID_TOTP'
         }
       });
     }

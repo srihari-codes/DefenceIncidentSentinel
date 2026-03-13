@@ -193,6 +193,8 @@ export interface RegisterIdentityResponse {
   nextStep?: "SERVICE";
   message?: string;
   expiresIn?: number;
+  deliveryMode?: "smtp" | "mock";
+  devOtp?: string;
 }
 
 /** Step 2: Register Service Request (cookie auto-sent) */
