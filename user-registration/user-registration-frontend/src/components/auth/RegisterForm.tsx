@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { LucideIcon } from "lucide-react";
-import { Shield, Smartphone, CheckCircle2, Clock, Info, Eye, EyeOff, ArrowLeft, Users, Medal, Radar, Cpu, ChevronDown } from "lucide-react";
+import { Shield, CheckCircle2, Clock, Info, Eye, EyeOff, ArrowLeft, Users, Medal, Radar, Cpu, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -20,9 +20,8 @@ import {
   registerService,
   registerSecurity,
   registerGenerateTotp,
-  registerSendActivationOtp,
+  registerCompleteRegistration,
   registerActivateWithTotp,
-  registerActivateWithEmailOtp,
 } from "@/services/authService";
 import "./register-preview.css";
 import "./auth-stepper.css";
@@ -67,16 +66,11 @@ const RegisterForm = () => {
   const [userType, setUserType] = useState<RoleKey | "">("");
   const [serviceId, setServiceId] = useState("");
   const [serviceIdError, setServiceIdError] = useState("");
-  const [mfaMethod, setMfaMethod] = useState<"totp" | "email">("totp");
+  const [mfaMethod, setMfaMethod] = useState<"totp" | "email">("email");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [activationPassword, setActivationPassword] = useState("");
   const [activationPasswordError, setActivationPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [emailOtp, setEmailOtp] = useState("");
-  const [emailOtpError, setEmailOtpError] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCountdown, setOtpCountdown] = useState(0);
-  const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [hasActivatedPreview, setHasActivatedPreview] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -346,69 +340,6 @@ const RegisterForm = () => {
     }
   }, [hasActivatedPreview, previewContent, setPreviewContent]);
 
-  const clearOtpTimer = () => {
-    if (otpTimerRef.current) {
-      clearInterval(otpTimerRef.current);
-      otpTimerRef.current = null;
-    }
-  };
-
-  const startOtpCountdown = () => {
-    clearOtpTimer();
-    setOtpCountdown(60);
-    otpTimerRef.current = setInterval(() => {
-      setOtpCountdown((prev) => {
-        if (prev <= 1) {
-          clearOtpTimer();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleSendOtp = async () => {
-    if (!email || !email.trim()) {
-      toast({
-        title: "Update Email Address",
-        description: "Enter a valid email address in Step 1 so we can deliver the OTP.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Call registerSendActivationOtp API (cookie auto-sent)
-      const result = await registerSendActivationOtp();
-
-      if (result.success && result.data) {
-        setEmailOtp("");
-        setEmailOtpError("");
-        setOtpSent(true);
-        const expiresIn = result.data.expiresIn || 300;
-        setOtpCountdown(expiresIn);
-        startOtpCountdown();
-        toast({
-          title: "OTP Sent",
-          description: result.data.message || `A one-time code has been dispatched to ${email}.`,
-        });
-      } else {
-        toast({
-          title: "Failed to Send OTP",
-          description: result.error?.message || "Could not send OTP. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Send OTP error:", error);
-      toast({
-        title: "OTP Error",
-        description: "An error occurred while sending OTP. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   // Email Verification Functions for Step 1
   const clearEmailVerificationTimer = () => {
     if (emailVerificationTimerRef.current) {
@@ -597,14 +528,8 @@ const RegisterForm = () => {
     setActivationPassword("");
     setActivationPasswordError("");
     setShowPassword(false);
-    setEmailOtp("");
-    setEmailOtpError("");
-    clearOtpTimer();
-    setOtpSent(false);
-    setOtpCountdown(0);
     evaluateEmailAgainstRole(roleConfigurations[roleKey], undefined, roleKey);
-    // Default to authenticator (totp) for all roles as it's more secure
-    setMfaMethod("totp");
+    setMfaMethod("email");
   };
 
   const handleServiceIdChange = (rawValue: string) => {
@@ -615,35 +540,10 @@ const RegisterForm = () => {
     }
   };
 
-  const handleMfaMethodChange = (value: string) => {
-    // Allow users to choose their preferred MFA method
-    setMfaMethod(value === "email" ? "email" : "totp");
-    if (value === "email") {
-      setEmailOtp("");
-      setEmailOtpError("");
-      setOtpSent(false);
-      setOtpCountdown(0);
-    } else {
-      setEmailOtp("");
-      setEmailOtpError("");
-      clearOtpTimer();
-      setOtpSent(false);
-      setOtpCountdown(0);
-    }
-  };
-
   const handleActivationPasswordChange = (value: string) => {
     setActivationPassword(value);
     if (activationPasswordError) {
       validateActivationPassword(value, currentRoleConfig);
-    }
-  };
-
-  const handleEmailOtpChange = (rawValue: string) => {
-    const cleaned = rawValue.replace(/\D/g, "").slice(0, 6);
-    setEmailOtp(cleaned);
-    if (emailOtpError) {
-      setEmailOtpError("");
     }
   };
 
@@ -710,16 +610,6 @@ const RegisterForm = () => {
   };
 
   // Removed enforced MFA method logic - users can now choose their preferred method
-
-  useEffect(() => {
-    if (!showMFASetup || mfaMethod !== "email") {
-      clearOtpTimer();
-      setOtpSent(false);
-      setOtpCountdown(0);
-    }
-  }, [showMFASetup, mfaMethod]);
-
-  useEffect(() => () => clearOtpTimer(), []);
 
   // Cleanup email verification timer on unmount
   useEffect(() => () => clearEmailVerificationTimer(), []);
@@ -898,6 +788,9 @@ const RegisterForm = () => {
           } as unknown as TotpSetup);
           setBackupCodes(totpResult.data.backup_codes || []);
         } else {
+          setIsVerified(false);
+          setIsSubmitted(false);
+          setCurrentStep(3);
           toast({
             title: "TOTP Setup Failed",
             description: totpResult.error?.message || "Failed to generate authenticator setup.",
@@ -905,11 +798,18 @@ const RegisterForm = () => {
           });
           return;
         }
+
+        toast({
+          title: "Verification Successful",
+          description: "Your Defence credentials have been verified.",
+        });
+        setShowMFASetup(true);
+        return;
       }
-      
+
       toast({
-        title: "Verification Successful",
-        description: "Your Defence credentials have been verified.",
+        title: "Security Preferences Saved",
+        description: "Proceed to the final activation step.",
       });
       setShowMFASetup(true);
     } catch (error) {
@@ -925,19 +825,18 @@ const RegisterForm = () => {
   };
 
   const handleCompleteMfaSetup = async () => {
-    if (mfaMethod === "totp") {
-      if (totpCode.length !== 6) {
-        const message = "Enter the 6-digit code from your authenticator app.";
-        setTotpError(message);
-        toast({
-          title: "Verify Authenticator Code",
-          description: message,
-          variant: "destructive",
-        });
-        return;
-      }
+    if (mfaMethod === "totp" && totpCode.length > 0 && totpCode.length !== 6) {
+      const message = "Enter a full 6-digit authenticator code, or leave it blank to continue without authenticator setup.";
+      setTotpError(message);
+      toast({
+        title: "Check Authenticator Code",
+        description: message,
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Call registerActivateWithTotp API (server verifies TOTP code)
+    if (mfaMethod === "totp" && totpCode.length === 6) {
       try {
         const result = await registerActivateWithTotp({
           totp_verification_code: totpCode,
@@ -946,31 +845,24 @@ const RegisterForm = () => {
         if (result.success && result.data) {
           setTotpCode("");
           setTotpError("");
-          
-          // Check for authorization code flow (new backend flow)
+
           if (result.data.redirect_url && result.data.code) {
             toast({
               title: "Registration Complete!",
               description: result.data.message || "Redirecting to dashboard...",
             });
-            
-            // Redirect to dashboard with authorization code
+
             setTimeout(() => {
               window.location.href = result.data.redirect_url!;
             }, 1500);
             return;
           }
-          
-          // Fallback: Old direct cookie flow (for backward compatibility)
-          // Note: JWT tokens are set as HttpOnly cookies by the server
-          // No need to store in localStorage
-          
+
           toast({
             title: "Registration Complete!",
             description: result.data.message || "Redirecting to your dashboard...",
           });
 
-          // Redirect to role-specific dashboard
           if (userType) {
             const redirectUrl = getRoleBasedRedirect(userType);
             setTimeout(() => {
@@ -1001,110 +893,56 @@ const RegisterForm = () => {
       return;
     }
 
-    if (mfaMethod === "email") {
-      if (!otpSent) {
-        const message = "Send the OTP to your email before completing setup.";
-        setEmailOtpError(message);
+    try {
+      const result = await registerCompleteRegistration();
+
+      if (!result.success || !result.data) {
         toast({
-          title: "Send OTP",
-          description: message,
+          title: "Activation Failed",
+          description: result.error?.message || "Could not complete registration.",
           variant: "destructive",
         });
         return;
       }
 
-      if (otpCountdown === 0) {
-        const message = "Your OTP expired. Resend a new code to continue.";
-        setEmailOtpError(message);
+      if (result.data.redirect_url && result.data.code) {
         toast({
-          title: "OTP Expired",
-          description: message,
-          variant: "destructive",
+          title: "Registration Complete!",
+          description: result.data.message || "Redirecting to dashboard...",
         });
+
+        setTimeout(() => {
+          window.location.href = result.data.redirect_url!;
+        }, 1500);
         return;
       }
 
-      if (emailOtp.length !== 6) {
-        const message = "Enter the 6-digit code we just sent to your email.";
-        setEmailOtpError(message);
-        toast({
-          title: "Verify Email Code",
-          description: message,
-          variant: "destructive",
-        });
-        return;
-      }
+      toast({
+        title: "Registration Complete!",
+        description: result.data.message || "Redirecting to your dashboard...",
+      });
 
-      // Call registerActivateWithEmailOtp API
-      try {
-        const result = await registerActivateWithEmailOtp(emailOtp);
-
-        if (result.success && result.data) {
-          clearOtpTimer();
-          setEmailOtp("");
-          setEmailOtpError("");
-          setOtpSent(false);
-          setOtpCountdown(0);
-          
-          // Check for authorization code flow (new backend flow)
-          if (result.data.redirect_url && result.data.code) {
-            toast({
-              title: "Registration Complete!",
-              description: result.data.message || "Redirecting to dashboard...",
-            });
-            
-            // Redirect to dashboard with authorization code
-            setTimeout(() => {
-              window.location.href = result.data.redirect_url!;
-            }, 1500);
-            return;
+      if (userType) {
+        const redirectUrl = getRoleBasedRedirect(userType);
+        setTimeout(() => {
+          if (redirectUrl.startsWith("http")) {
+            window.location.href = redirectUrl;
+          } else {
+            navigate(redirectUrl);
           }
-          
-          // Fallback: Old direct cookie flow (for backward compatibility)
-          // Note: JWT tokens are set as HttpOnly cookies by the server
-          // No need to store in localStorage
-          
-          toast({
-            title: "Registration Complete!",
-            description: result.data.message || "Redirecting to your dashboard...",
-          });
-
-          // Redirect to role-specific dashboard
-          if (userType) {
-            const redirectUrl = getRoleBasedRedirect(userType);
-            setTimeout(() => {
-              if (redirectUrl.startsWith("http")) {
-                window.location.href = redirectUrl;
-              } else {
-                navigate(redirectUrl);
-              }
-            }, 1500);
-          }
-        } else {
-          setEmailOtpError(result.error?.message || "Invalid code. Please try again.");
-          toast({
-            title: "Verification Failed",
-            description: result.error?.message || "Invalid verification code.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Email OTP verification error:", error);
-        toast({
-          title: "Verification Error",
-          description: "An error occurred. Please try again.",
-          variant: "destructive",
-        });
+        }, 1500);
       }
+    } catch (error) {
+      console.error("Registration completion error:", error);
+      toast({
+        title: "Activation Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleBackFromMfa = () => {
-    clearOtpTimer();
-    setEmailOtp("");
-    setEmailOtpError("");
-    setOtpSent(false);
-    setOtpCountdown(0);
     setShowMFASetup(false);
     setIsSubmitted(false);
     setCurrentStep(3);
@@ -1473,67 +1311,30 @@ const RegisterForm = () => {
       {currentStep === 3 && (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label>Preferred MFA Method *</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3" role="radiogroup" aria-label="Select MFA method">
-              <button
-                type="button"
-                onClick={() => handleMfaMethodChange("totp")}
-                className={`rounded-lg border p-4 text-left transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
-                  mfaMethod === "totp"
-                    ? "border-[hsl(213,100%,18%)] bg-[hsl(210,40%,96.1%)]"
-                    : "border-[hsl(213,100%,18%)]/20 bg-white"
-                }`}
-                role="radio"
-                aria-checked={mfaMethod === "totp"}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      mfaMethod === "totp"
-                        ? "bg-[hsl(213,100%,18%)] text-white"
-                        : "bg-[hsl(213,100%,18%)]/10 text-[hsl(213,100%,18%)]"
-                    }`}
-                  >
-                    <Shield className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[hsl(213,100%,18%)]">Authenticator App</p>
-                    <p className="text-xs text-[hsl(0,0%,45%)]">Use time-based codes from your authenticator.</p>
-                  </div>
+            <Label htmlFor="optionalTotp">Authenticator Setup (Optional)</Label>
+            <div className="rounded-lg border border-[hsl(213,100%,18%)]/15 bg-[hsl(210,40%,96.1%)] p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <input
+                  id="optionalTotp"
+                  type="checkbox"
+                  checked={mfaMethod === "totp"}
+                  onChange={(e) => setMfaMethod(e.target.checked ? "totp" : "email")}
+                  className="mt-1 rounded"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-[hsl(213,100%,18%)]">Set up authenticator app now</p>
+                  <p className="text-xs text-[hsl(0,0%,31%)]">
+                    Recommended for stronger security. Leave unchecked to finish registration without authenticator setup.
+                  </p>
                 </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleMfaMethodChange("email")}
-                className={`rounded-lg border p-4 text-left transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[hsl(213,100%,18%)] ${
-                  mfaMethod === "email"
-                    ? "border-[hsl(213,100%,18%)] bg-[hsl(210,40%,96.1%)]"
-                    : "border-[hsl(213,100%,18%)]/20 bg-white"
-                }`}
-                role="radio"
-                aria-checked={mfaMethod === "email"}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      mfaMethod === "email"
-                        ? "bg-[hsl(213,100%,18%)] text-white"
-                        : "bg-[hsl(213,100%,18%)]/10 text-[hsl(213,100%,18%)]"
-                    }`}
-                  >
-                    <Smartphone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[hsl(213,100%,18%)]">Email OTP</p>
-                    <p className="text-xs text-[hsl(0,0%,30%)]">Receive one-time codes via your registered email.</p>
-                  </div>
+              </div>
+              {mfaMethod === "totp" && (
+                <div className="flex items-center gap-2 text-xs text-[hsl(0,0%,31%)]">
+                  <Shield className="w-4 h-4 text-[hsl(213,100%,18%)]" />
+                  <span>You'll scan a QR code and confirm a 6-digit authenticator code in Step 4.</span>
                 </div>
-              </button>
+              )}
             </div>
-            <p className="text-xs text-[hsl(0,0%,31%)]">
-              Authenticator app (TOTP) is recommended for higher security and works offline.
-            </p>
           </div>
 
           <div className="space-y-2">
@@ -1624,7 +1425,7 @@ const RegisterForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="totpCode">Enter Authenticator Code</Label>
+                <Label htmlFor="totpCode">Enter Authenticator Code (Optional)</Label>
                 <Input
                   id="totpCode"
                   type="text"
@@ -1644,7 +1445,7 @@ const RegisterForm = () => {
                 {totpError ? (
                   <p className="text-xs text-[hsl(0,84%,60%)]">{totpError}</p>
                 ) : (
-                  <p className="text-xs text-[hsl(0,0%,24%)]">Enter the 6-digit code from your authenticator app.</p>
+                  <p className="text-xs text-[hsl(0,0%,24%)]">You can enter a 6-digit code now, or leave it blank and continue.</p>
                 )}
               </div>
 
@@ -1661,44 +1462,16 @@ const RegisterForm = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-[hsl(0,0%,24%)]">You'll receive an email with a one-time code for MFA.</p>
-              <div className="space-y-2">
-                <Label htmlFor="emailOtpSetup">Enter Verification Code</Label>
-                <Input
-                  id="emailOtpSetup"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d*"
-                  maxLength={6}
-                  value={emailOtp}
-                  onChange={(e) => handleEmailOtpChange(e.target.value)}
-                  className="text-center text-2xl tracking-widest"
-                  aria-invalid={Boolean(emailOtpError)}
-                />
-                {emailOtpError ? (
-                  <p className="text-xs text-[hsl(0,84%,60%)]">{emailOtpError}</p>
-                ) : (
-                  <p className="text-xs text-[hsl(0,0%,24%)]">Enter the OTP to confirm your email address.</p>
-                )}
-                <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <Button type="button" variant="secondary" onClick={handleSendOtp} disabled={otpCountdown > 0}>
-                    {otpSent ? (otpCountdown > 0 ? `Resend in ${formatCountdown(otpCountdown)}` : "Resend OTP") : "Send OTP"}
-                  </Button>
-                  {otpSent && (
-                    <p className={`text-xs ${otpCountdown > 0 ? "text-[hsl(122,39%,49%)]" : "text-[hsl(0,84%,60%)]"}`}>
-                      {otpCountdown > 0
-                        ? `OTP sent to ${email}. Valid for ${formatCountdown(otpCountdown)}.`
-                        : "OTP expired. Tap resend to request a new code."}
-                    </p>
-                  )}
-                </div>
-              </div>
+            <div className="rounded-lg border border-[hsl(213,100%,18%)]/15 bg-[hsl(210,40%,96.1%)] p-4">
+              <p className="text-sm font-semibold text-[hsl(213,100%,18%)]">Final Activation</p>
+              <p className="text-xs text-[hsl(0,0%,31%)] mt-1">
+                Authenticator setup was skipped. Complete this final step to activate your account.
+              </p>
             </div>
           )}
 
           <Button className="w-full" size="lg" onClick={handleCompleteMfaSetup}>
-            Complete Setup & Continue
+            Complete Registration
           </Button>
           <Button type="button" variant="outline" className="w-full" onClick={handleBackFromMfa}>
             Return to Security Settings

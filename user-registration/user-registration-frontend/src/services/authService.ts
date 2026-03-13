@@ -27,6 +27,7 @@ import type {
   RegisterSecurityResponse,
   RegisterActivateGenerateTotpRequest,
   RegisterActivateSendOtpRequest,
+  RegisterActivateCompleteDirectRequest,
   RegisterActivateVerifyTotpRequest,
   RegisterActivateVerifyEmailRequest,
   RegisterActivateTotpSetupResponse,
@@ -226,6 +227,19 @@ export async function registerSendActivationOtp(): Promise<{
 }
 
 /**
+ * Step 4b-alt: Complete registration directly when authenticator is skipped
+ */
+export async function registerCompleteRegistration(): Promise<{
+  success: boolean;
+  data?: RegisterActivateCompleteResponse;
+  error?: ApiError;
+}> {
+  console.log("[AuthService] Register Step 4b-alt: Completing registration without authenticator setup");
+  const request: RegisterActivateCompleteDirectRequest = { action: "complete_registration" };
+  return apiCall<RegisterActivateCompleteResponse>(API_ENDPOINTS.AUTH.REGISTER_ACTIVATE, request);
+}
+
+/**
  * Step 4c: Verify TOTP and complete registration (for TOTP roles)
  * Admin can include extra fields
  */
@@ -280,6 +294,7 @@ export default {
   registerSecurity,
   registerGenerateTotp,
   registerSendActivationOtp,
+  registerCompleteRegistration,
   registerActivateWithTotp,
   registerActivateWithEmailOtp,
   // Authorization code exchange

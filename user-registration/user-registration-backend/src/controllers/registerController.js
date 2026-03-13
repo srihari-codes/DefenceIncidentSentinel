@@ -389,6 +389,40 @@ async function activateStep(req, res) {
         }
       });
     }
+
+    // Complete registration directly from Step 4 (used when authenticator is skipped)
+    if (action === 'complete_registration') {
+      const resolvedMfaMethod = challenge.mfa_method === 'TOTP' ? 'email' : challenge.mfa_method.toLowerCase();
+
+      const user = await User.create({
+        full_name: challenge.full_name,
+        email: challenge.email,
+        mobile: challenge.mobile,
+        identifier: challenge.identifier,
+        role: challenge.role,
+        password_hash: challenge.password_hash,
+        mfa_method: resolvedMfaMethod,
+        is_verified: true,
+        email_verified_at: new Date()
+      });
+
+      // Clear registration challenge
+      clearRegistrationChallenge(res);
+
+      // Generate short-lived authorization code
+      const AuthCode = require('../models/AuthCode');
+      const authCode = await AuthCode.createAuthCode(user.user_id, user.role, 30);
+
+      // Get redirect URL based on role
+      const redirectUrl = config.dashboards[user.role] || config.dashboards.personnel;
+
+      return res.status(200).json({
+        message: 'Registration complete! Redirecting to dashboard...',
+        redirect_url: `${redirectUrl}/callback?code=${authCode}`,
+        code: authCode,
+        expires_in: 30
+      });
+    }
     
     // Handle TOTP setup
     if (challenge.mfa_method === 'TOTP') {

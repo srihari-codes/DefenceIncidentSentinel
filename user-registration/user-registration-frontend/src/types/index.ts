@@ -228,6 +228,11 @@ export interface RegisterActivateSendOtpRequest {
   action: "send_otp";
 }
 
+/** Step 4: Register Activate Request - Complete without authenticator setup */
+export interface RegisterActivateCompleteDirectRequest {
+  action: "complete_registration";
+}
+
 /** Step 4: Register Activate Request - Verify TOTP (cookie auto-sent) */
 export interface RegisterActivateVerifyTotpRequest {
   totp_verification_code: string;
