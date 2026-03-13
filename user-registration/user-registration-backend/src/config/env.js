@@ -69,10 +69,10 @@ module.exports = {
   
   // Dashboard Redirect URLs
   dashboards: {
-    admin: process.env.ADMIN_DASHBOARD_URL || 'http://admin.localhost:3001',
-    cert: process.env.CERT_DASHBOARD_URL || 'http://officer.localhost:3002',
-    personnel: process.env.PERSONNEL_DASHBOARD_URL || 'http://app.localhost:3003',
-    family: process.env.FAMILY_DASHBOARD_URL || 'http://app.localhost:3003',
-    veteran: process.env.VETERAN_DASHBOARD_URL || 'http://app.localhost:3003'
+    admin: process.env.ADMIN_DASHBOARD_URL || 'http://localhost:5176',
+    cert: process.env.CERT_DASHBOARD_URL || 'http://localhost:5175',
+    personnel: process.env.PERSONNEL_DASHBOARD_URL || 'http://localhost:5174',
+    family: process.env.FAMILY_DASHBOARD_URL || 'http://localhost:5174',
+    veteran: process.env.VETERAN_DASHBOARD_URL || 'http://localhost:5174'
   }
 };

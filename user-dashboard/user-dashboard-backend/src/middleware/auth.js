@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { ERROR_CODES } = require('../constants');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_user_dashboard_jwt_secret';
+
 /**
  * Middleware: Extract and verify JWT from HttpOnly cookie.
  * Sets req.user = { uid, role, iat, exp }
@@ -17,7 +19,7 @@ const requireAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
