@@ -10,8 +10,8 @@ import { VALIDATION_PATTERNS } from "@/lib/constants";
 // Re-export types for backward compatibility
 export type { RoleKey, RoleConfig, PasswordPolicy };
 
-/** Defence email pattern for validation */
-export const defenceEmailPattern = VALIDATION_PATTERNS.DEFENCE_EMAIL;
+/** Generic email pattern for validation (all domains supported) */
+export const defenceEmailPattern = VALIDATION_PATTERNS.EMAIL;
 
 /** Available role options for selection dropdowns */
 export const roleOptions: RoleOption[] = [
@@ -28,9 +28,9 @@ export const roleConfigurations: Record<RoleKey, RoleConfig> = {
     idPattern: /^[A-Z0-9-]{6,15}$/,
     idValidationMessage: "Enter a valid Service Number (e.g., IC-123456).",
     inputType: "text",
-    requiresDefenceEmail: true,
+    requiresDefenceEmail: false,
     emailPattern: defenceEmailPattern,
-    emailErrorMessage: "Official defence email (nic.in/gov.in/mil.in) required for personnel.",
+    emailErrorMessage: "Please enter a valid email address.",
     passwordPolicy: {
       minLength: 12,
       requireSpecialCharacter: true,
@@ -45,7 +45,6 @@ export const roleConfigurations: Record<RoleKey, RoleConfig> = {
     idValidationMessage: "Enter a valid Dependent Card or PPO Number.",
     inputType: "text",
     requiresDefenceEmail: false,
-    emailWarningMessage: "Non-defence email detected. Verification may take longer.",
     passwordPolicy: {
       minLength: 12,
       requireSpecialCharacter: true,

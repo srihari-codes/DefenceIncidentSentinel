@@ -285,9 +285,7 @@ const LoginForm = () => {
       ]
     : [];
 
-  const requiresEmailEntry = Boolean(
-    currentRoleConfig?.requiresDefenceEmail || currentRoleConfig?.inputType === "email"
-  );
+  const requiresEmailEntry = Boolean(currentRoleConfig);
   const showServiceIdField = currentRoleConfig?.inputType !== "email";
   const minRequiredPasswordLength = useMemo(
     () => Math.max(12, currentRoleConfig?.passwordPolicy?.minLength ?? 12),
@@ -439,7 +437,7 @@ const LoginForm = () => {
     const config = userType ? roleConfigurations[userType] : undefined;
     if (config?.passwordPolicy) {
       const { minLength, requireSpecialCharacter, message } = config.passwordPolicy;
-      const specialCharacterRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+      const specialCharacterRegex = /[^A-Za-z0-9]/;
       if (
         password.length < minLength ||
         (requireSpecialCharacter && !specialCharacterRegex.test(password))
@@ -949,12 +947,16 @@ const LoginForm = () => {
                   <Label htmlFor="officialEmail">
                     {currentRoleConfig?.inputType === "email"
                       ? `${currentRoleConfig.idLabel} *`
-                      : "Official Defence Email *"}
+                      : "Email Address *"}
                   </Label>
                   <Input
                     id="officialEmail"
                     type="email"
-                    placeholder={currentRoleConfig?.inputType === "email" ? currentRoleConfig.placeholder : "yourname@gov.in"}
+                    placeholder={
+                      currentRoleConfig?.inputType === "email"
+                        ? currentRoleConfig.placeholder ?? "yourname@gmail.com or yourname@gov.in"
+                        : "yourname@gmail.com or yourname@gov.in"
+                    }
                     value={email}
                     onChange={(e) => handleEmailChange(e.target.value)}
                     autoComplete="off"
@@ -967,7 +969,7 @@ const LoginForm = () => {
                   ) : currentRoleConfig?.tooltip ? (
                     <p className="text-xs text-[hsl(0,0%,45%)]">{currentRoleConfig.tooltip}</p>
                   ) : (
-                    <p className="text-xs text-[hsl(0,0%,45%)]">Use your authorised defence email for verification.</p>
+                    <p className="text-xs text-[hsl(0,0%,45%)]">Any valid email domain is supported (for example, gmail.com or gov.in).</p>
                   )}
                 </div>
               )}

@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { roleConfigurations, roleOptions, RoleKey, RoleConfig, defenceEmailPattern } from "@/lib/roleConfig";
+import { roleConfigurations, roleOptions, RoleKey, RoleConfig } from "@/lib/roleConfig";
 import { cn } from "@/lib/utils";
 import { useAuthPreview } from "./AuthLayout";
 import type { TotpSetup } from "@/lib/auth/totpService";
@@ -271,7 +271,7 @@ const RegisterForm = () => {
                     </dl>
 
                     <div className="text-[11px] uppercase tracking-[0.36em] text-[hsl(213,100%,18%)]/55">
-                      {email.trim() || "name@defence.mil.in"}
+                      {email.trim() || "name@gmail.com"}
                     </div>
                   </>
                 )}
@@ -570,27 +570,8 @@ const RegisterForm = () => {
       return;
     }
 
-    if (config.emailWhitelist && !config.emailWhitelist.includes(candidate)) {
-      setEmailError("Email not listed in the approved roster.");
-      return;
-    }
-
-    if (config.requiresDefenceEmail && config.emailPattern && !config.emailPattern.test(candidate)) {
-      setEmailError(config.emailErrorMessage ?? "Official defence email required.");
-      return;
-    }
-
-    if (config.emailPattern && !config.emailPattern.test(candidate)) {
-      if (config.emailWarningMessage) {
-        setEmailWarning(config.emailWarningMessage);
-      }
-      return;
-    }
-
-    if (roleKey === "family" && !defenceEmailPattern.test(candidate)) {
-      setEmailWarning(
-        config.emailWarningMessage ?? "Non-defence email detected. Manual verification required."
-      );
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate)) {
+      setEmailError("Please enter a valid email address.");
     }
   };
 
@@ -1271,7 +1252,7 @@ const RegisterForm = () => {
             <Input
               id="email"
               type="email"
-              placeholder="yourname@gov.in"
+              placeholder="yourname@gmail.com or yourname@gov.in"
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               disabled={isEmailVerified}
@@ -1289,7 +1270,11 @@ const RegisterForm = () => {
               <p className="text-xs text-[hsl(0,0%,45%)]">
                 You'll need to verify this email before continuing.
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-[hsl(0,0%,45%)]">
+                Any valid email domain is supported (for example, gmail.com or gov.in).
+              </p>
+            )}
           </div>
 
           {/* Email Verification Section */}
