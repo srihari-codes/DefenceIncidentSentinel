@@ -1,4 +1,4 @@
-import { Menu, Search, Bell, LogOut, User as UserIcon, X } from 'lucide-react';
+import { Menu, Search, Bell, LogOut, User as UserIcon, X, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '../api/user';
@@ -248,7 +248,7 @@ export function Header({ onMenuClick }) {
         </div>
 
         {/* Profile Menu */}
-        <div ref={profileRef} className="relative hidden sm:block">
+        <div ref={profileRef} className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 hover:bg-gray-50 rounded-lg p-1 transition-colors"
@@ -278,6 +278,16 @@ export function Header({ onMenuClick }) {
                 >
                   <UserIcon className="w-4 h-4" />
                   <span>Settings</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    window.dispatchEvent(new Event('dis:start-tour'));
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Quick User Guide</span>
                 </button>
                 <button
                   onClick={handleLogout}

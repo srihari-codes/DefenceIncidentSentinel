@@ -40,6 +40,8 @@ export function AuthCallback() {
         }
 
         // Backend has set HttpOnly cookies, just redirect to dashboard
+        // Flag the tour to show once for this fresh login
+        sessionStorage.setItem('dis-just-logged-in', '1');
         navigate('/dashboard');
       } catch (err) {
         console.error('Auth callback error:', err);

@@ -340,9 +340,9 @@ export function NewComplaint() {
 
         {/* Step 1: Basic Information */}
         {currentStep >= 1 && (
-          <div id="step-1" className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8 transition-all duration-300">
+          <div id="step-1" data-tour="new-complaint-form" className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8 transition-all duration-300">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4 shrink-0">
                 <User className="text-white" size={22} />
               </div>
               <div>
@@ -424,7 +424,7 @@ export function NewComplaint() {
         {currentStep >= 2 && (
           <div id="step-2" className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8 transition-all duration-300">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4 shrink-0">
                 <AlertTriangle className="text-white" size={22} />
               </div>
               <div>
@@ -541,7 +541,7 @@ export function NewComplaint() {
         {currentStep >= 3 && (
           <div id="step-3" className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8 transition-all duration-300">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4 shrink-0">
                 <Upload className="text-white" size={22} />
               </div>
               <div>
@@ -623,7 +623,7 @@ export function NewComplaint() {
         {currentStep >= 4 && (
           <div id="step-4" className="bg-white rounded-lg shadow-sm p-6 lg:p-8 mb-8">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4 shrink-0">
                 <CheckCircle className="text-white" size={22} />
               </div>
               <div>
@@ -709,21 +709,21 @@ export function NewComplaint() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white flex-shrink-0">1</div>
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">1</div>
                     <div>
                       <div className="text-gray-900">Instant Confirmation</div>
                       <div className="text-gray-600 mt-1">Receive unique complaint ID</div>
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white flex-shrink-0">2</div>
+                    <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">2</div>
                     <div>
                       <div className="text-gray-900">CERT-Army Review</div>
                       <div className="text-gray-600 mt-1">Expert analysis within 24 hours</div>
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-white flex-shrink-0">3</div>
+                    <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-white shrink-0">3</div>
                     <div>
                       <div className="text-gray-900">Status Updates</div>
                       <div className="text-gray-600 mt-1">Track progress in real-time</div>

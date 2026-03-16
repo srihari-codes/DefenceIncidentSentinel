@@ -1,6 +1,10 @@
-import { Mail, Phone, MessageCircle, FileText, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MessageCircle, FileText, ExternalLink, Sparkles } from 'lucide-react';
 
 export function Help() {
+  const handleStartTour = () => {
+    window.dispatchEvent(new Event('dis:start-tour'));
+  };
+
   const contactOptions = [
     {
       icon: Mail,
@@ -72,8 +76,19 @@ export function Help() {
   return (
     <div className="p-4 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">Help & Support</h1>
-        <p className="text-gray-500 text-xs sm:text-sm">Get assistance and find answers to common questions</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-2">Help & Support</h1>
+            <p className="text-gray-500 text-xs sm:text-sm">Get assistance and find answers to common questions</p>
+          </div>
+          <button
+            onClick={handleStartTour}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+          >
+            <Sparkles className="h-4 w-4" />
+            Start Quick Tour
+          </button>
+        </div>
       </div>
 
       {/* Contact Options */}
@@ -106,7 +121,7 @@ export function Help() {
       {/* Emergency Contact */}
       <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center shrink-0">
             <Phone className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">

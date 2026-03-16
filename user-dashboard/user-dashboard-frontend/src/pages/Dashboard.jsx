@@ -100,6 +100,7 @@ export function Dashboard() {
         {/* FILE A COMPLAINT */}
         <div
           onClick={handleFileComplaint}
+          data-tour="dashboard-card-file-complaint"
           className="bg-white border-2 border-blue-600 rounded-2xl p-8 cursor-pointer hover:bg-blue-50 transition-colors group h-[200px] flex flex-col justify-center"
         >
           <div className="w-14 h-14 bg-blue-100 group-hover:bg-blue-200 rounded-xl mb-4 flex items-center justify-center transition-colors">
@@ -112,7 +113,8 @@ export function Dashboard() {
         {/* VIEW COMPLAINTS */}
         <div
           onClick={handleViewComplaints}
-          className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-all h-[200px] flex flex-col justify-center"
+          data-tour="dashboard-card-manage-complaints"
+          className="bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-all h-[200px] flex flex-col justify-center"
         >
           <h3 className="text-blue-700 font-semibold text-xl mb-4">Your Complaints</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -130,7 +132,8 @@ export function Dashboard() {
         {/* CHAT WITH AI */}
         <div
           onClick={handleChat}
-          className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-all h-[200px] flex flex-col justify-center"
+          data-tour="dashboard-card-ai-assistant"
+          className="bg-linear-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-all h-[200px] flex flex-col justify-center"
         >
           <div className="w-14 h-14 bg-purple-100 rounded-xl mb-4 flex items-center justify-center">
             <span className="text-3xl">💬</span>

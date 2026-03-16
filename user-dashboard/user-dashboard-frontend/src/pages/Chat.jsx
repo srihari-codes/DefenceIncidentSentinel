@@ -278,6 +278,18 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const handleOpenQuickActions = () => {
+      setQuickActionsOpen(true);
+    };
+
+    window.addEventListener("dis:open-chat-quick-actions", handleOpenQuickActions);
+
+    return () => {
+      window.removeEventListener("dis:open-chat-quick-actions", handleOpenQuickActions);
+    };
+  }, []);
+
   /* ---------------- PUSH AI MESSAGE ---------------- */
   const pushAiMessage = (text) => {
     const msg = {
@@ -837,10 +849,10 @@ return;
                 </button>
               ) : message.sender === "ai" ? (
                 <div className="flex gap-2 sm:gap-3 max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-3xl">
-                  <div className="flex-shrink-0 w-6 sm:w-8 h-6 sm:h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <div className="shrink-0 w-6 sm:w-8 h-6 sm:h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                     <Shield className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
                   </div>
-                  <div className="bg-gray-100 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-gray-700 text-xs sm:text-sm leading-relaxed relative whitespace-pre-wrap break-words">
+                  <div className="bg-gray-100 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-gray-700 text-xs sm:text-sm leading-relaxed relative whitespace-pre-wrap wrap-break-word">
                     {message.text}
                     <div className="text-[8px] sm:text-[10px] text-gray-500 mt-1 text-right">
                       {message.timestamp}
@@ -849,13 +861,13 @@ return;
                 </div>
               ) : (
                 <div className="flex gap-1.5 sm:gap-2 max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-3xl items-end">
-                  <div className="bg-blue-500 text-white rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed break-words relative whitespace-pre-wrap">
+                  <div className="bg-blue-500 text-white rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed wrap-break-word relative whitespace-pre-wrap">
                     {message.text}
                     <div className="text-[8px] sm:text-[10px] text-blue-200 mt-1 text-right">
                       {message.timestamp}
                     </div>
                   </div>
-                  <div className="w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
                     <span className="text-white text-xs sm:text-sm font-semibold">👤</span>
                   </div>
                 </div>
@@ -917,8 +929,9 @@ return;
         )}
 
         {/* QUICK ACTIONS SECTION */}
-        <div className="border-b border-gray-100">
+        <div className="border-b border-gray-100" data-tour="chat-quick-actions-section">
           <div
+            data-tour="chat-quick-actions-toggle"
             className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition-colors"
             onClick={() => setQuickActionsOpen(!quickActionsOpen)}
           >
@@ -935,6 +948,7 @@ return;
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
                 <button
                   onClick={() => handleQuickAction("File Report")}
+                  data-tour="chat-quick-action-file-report"
                   className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
                 >
                   <FileText className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
@@ -942,6 +956,7 @@ return;
                 </button>
                 <button
                   onClick={() => handleQuickAction("Check Status")}
+                  data-tour="chat-quick-action-check-status"
                   className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
                 >
                   <Activity className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
@@ -949,6 +964,7 @@ return;
                 </button>
                 <button
                   onClick={() => handleQuickAction("Risk Analysis")}
+                  data-tour="chat-quick-action-risk-analysis"
                   className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
                 >
                   <AlertTriangle className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
@@ -956,6 +972,7 @@ return;
                 </button>
                 <button
                   onClick={() => handleQuickAction("Playbooks")}
+                  data-tour="chat-quick-action-playbooks"
                   className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-colors group hover:bg-gray-100"
                 >
                   <BookOpen className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600 group-hover:text-blue-700" />
@@ -973,7 +990,7 @@ return;
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {pendingFiles.map(file => (
                   <div key={file.id} className="flex items-center gap-1.5 bg-blue-500 text-white rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
-                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
+                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 shrink-0" />
                     <span className="text-[10px] sm:text-xs font-medium truncate max-w-[120px] sm:max-w-none">{file.name}</span>
                     <button
                       onClick={() => removePendingFile(file.id)}
@@ -995,7 +1012,7 @@ return;
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {messages.flatMap(m => m.attachments || []).map(attachment => (
                   <div key={attachment.id} className="flex items-center gap-1.5 bg-gray-100 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
-                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 text-gray-600 flex-shrink-0" />
+                    <FileText className="w-3 sm:w-4 h-3 sm:h-4 text-gray-600 shrink-0" />
                     <span className="text-[10px] sm:text-xs text-gray-700 font-medium truncate max-w-[120px] sm:max-w-none">{attachment.name}</span>
                     <button className="text-gray-400 hover:text-gray-600 ml-1">
                       <X className="w-3 h-3" />
@@ -1010,7 +1027,7 @@ return;
         {/* INPUT AREA - AT BOTTOM OF FIXED SECTION */}
         <div className="bg-white px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
           <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
-            <label className="cursor-pointer text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+            <label className="cursor-pointer text-gray-400 hover:text-gray-600 transition-colors shrink-0">
               <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
               <input
                 type="file"
@@ -1029,7 +1046,7 @@ return;
             />
             <button
               onClick={handleSendMessage}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 sm:p-2.5 transition-colors flex-shrink-0"
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 sm:p-2.5 transition-colors shrink-0"
             >
               <Send className="w-4 sm:w-5 h-4 sm:h-5" />
             </button>

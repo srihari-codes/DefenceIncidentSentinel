@@ -96,6 +96,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
             <button
               key={item.id}
               onClick={() => handleNavClick(item.path)}
+              data-tour-nav={item.id}
               className={`w-full flex items-center py-3 px-4 rounded-lg transition-all duration-300 ease-in-out group relative ${
                 isCollapsed ? 'justify-center' : 'justify-start'
               } ${
@@ -169,6 +170,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
             <button
               key={item.id}
               onClick={() => handleNavClick(item.path)}
+              data-tour-nav={item.id}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 activePage === item.id
                   ? 'bg-white text-blue-600 font-semibold shadow-sm'

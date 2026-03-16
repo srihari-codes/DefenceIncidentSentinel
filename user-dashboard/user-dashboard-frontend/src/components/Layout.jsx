@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
+import { UserOnboardingTour } from './UserOnboardingTour';
 import { Outlet } from 'react-router-dom';
 import SidebarContext from '../contexts/SidebarContext';
 
@@ -47,6 +48,9 @@ export function Layout({ currentPage = 'dashboard' }) {
         
         {/* Mobile Bottom Navigation */}
         <BottomNav />
+
+        {/* First-time guided onboarding overlay */}
+        <UserOnboardingTour />
       </div>
     </div>
     </SidebarContext.Provider>
