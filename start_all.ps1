@@ -1,7 +1,7 @@
 # Start All Services Script for Defence Incident Sentinel
 
 # Set this to the folder where the repo is cloned.
-$repoRoot = "C:\Users\benny\Downloads\Bennyhinn\SIH"
+$repoRoot = "D:\"
 
 $services = @(
     @{ name = "Registration Backend (Port 4000)"; path = "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-backend"; command = "npm start"; port = 4000 },

@@ -164,7 +164,7 @@ export const VALIDATION_RULES = {
 // ==================== API SECURITY ====================
 
 export const API_SECURITY = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:4001',
   TIMEOUT_MS: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY_MS: 1000,

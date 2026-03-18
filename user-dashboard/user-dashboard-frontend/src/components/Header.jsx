@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '../api/user';
 import { getComplaints } from '../api/complaint';
+import { API_CONFIG } from '../utils/constants';
 
 export function Header({ onMenuClick }) {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ export function Header({ onMenuClick }) {
     localStorage.clear();
     sessionStorage.clear();
     navigate('/');
-    window.location.href = 'http://localhost:5173';
+    window.location.href = `${API_CONFIG.AUTH_FRONTEND_URL}/login`;
   };
 
   const handleComplaintClick = (complaintId) => {

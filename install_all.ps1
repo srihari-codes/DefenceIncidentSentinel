@@ -1,7 +1,7 @@
 # Install Dependencies Script for Defence Incident Sentinel
 
 # Set this to the folder where the repo is cloned.
-$repoRoot = "C:\Users\benny\Downloads\Bennyhinn\SIH"
+$repoRoot = "D:\"
 
 $directories = @(
     "$repoRoot\DefenceIncidentSentinel\user-registration\user-registration-backend",

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, XCircle, Loader2, Mail, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/lib/constants";
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -24,7 +25,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/api/auth/verify-email/${token}`);
+        const response = await fetch(`${API_BASE_URL}/auth/verify-email/${token}`);
         const data = await response.json();
 
         if (data.success) {
@@ -66,7 +67,7 @@ const VerifyEmail = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/auth/resend-verification", {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
