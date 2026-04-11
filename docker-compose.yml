@@ -1,22 +1,4 @@
 services:
-  # ── MongoDB ──────────────────────────────────────────────────────────
-  mongodb:
-    image: mongo:7
-    container_name: sentinel-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - sentinel-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
   # ── Registration Backend (Port 4000) ─────────────────────────────────
   registration-backend:
     build:
@@ -29,11 +11,8 @@ services:
     env_file:
       - .env
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/defence_sentinel
       - PORT=4000
-    depends_on:
-      mongodb:
-        condition: service_healthy
+      - AUTH_SERVICE_URL=http://registration-backend:4000
     networks:
       - sentinel-network
 
@@ -49,14 +28,10 @@ services:
     env_file:
       - .env
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/defence_sentinel
       - PORT=4001
       - AUTH_SERVICE_URL=http://registration-backend:4000
     depends_on:
-      mongodb:
-        condition: service_healthy
-      registration-backend:
-        condition: service_started
+      - registration-backend
     networks:
       - sentinel-network
 
@@ -122,11 +97,6 @@ services:
       - "5176:80"
     networks:
       - sentinel-network
-
-# ── Volumes ──────────────────────────────────────────────────────────
-volumes:
-  mongo-data:
-    driver: local
 
 # ── Networks ─────────────────────────────────────────────────────────
 networks:
